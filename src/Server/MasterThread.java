@@ -29,8 +29,9 @@ public class MasterThread implements Runnable{
             out.println("press (a) for manager OR (b) for renter");
             out.flush();
 
-
+            // read client response
             String line = ((MessageData)objectInput.readObject()).data;
+            System.out.println(line);
 
             while (line != null){
                 System.out.println("Thread:"+Thread.currentThread().threadId()+" Client says: " + line);
@@ -57,16 +58,20 @@ public class MasterThread implements Runnable{
     public void runManagerInterface(PrintWriter out, BufferedReader in, ObjectInputStream objectInput){
 
         out.println("Welcome to manager interface, would you like to insert a new room?");
+        out.flush();
+        System.out.println("Welcome to manager interface, would you like to insert a new room?");
+
         try {
+            String response = ((MessageData)objectInput.readObject()).data;
+            if (response.equals("y")) {
+                out.println("Insert json : ");
+                out.flush();
 
+                MessageData message = (MessageData) objectInput.readObject();
 
+                System.out.println(message.data);
+            }
 
-            out.println("Insert json : ");
-            out.flush();
-
-            MessageData message = (MessageData) objectInput.readObject();
-
-            System.out.println(message.data);
         }
         catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
