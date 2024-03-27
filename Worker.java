@@ -1,5 +1,6 @@
 package com.example;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import org.json.JSONObject;
@@ -24,12 +25,24 @@ public class Worker extends Thread {
 
                     switch (managerTask.getOperationType()) {
                         case ADD_LISTING:
-                            JSONObject details = managerTask.getPayload();
-                            // Convert JSONObject to RentalListing and add to managerService...
-                            break;
-                        case SHOW_LISTINGS:
-                            // Fetch listings from managerService and perhaps store somewhere
-                            break;
+                        JSONObject details = managerTask.getPayload();
+                        RentalListing listing = new RentalListing(
+                                details.getString("roomName"),
+                                details.getInt("noOfPersons"),
+                                details.getString("area"),
+                                details.getInt("stars"),
+                                details.getInt("noOfReviews"),
+                                details.getString("roomImage"));
+                        managerService.addListing(listing);
+                        System.out.println("Listing added: " + listing);
+                        break;
+                    case SHOW_LISTINGS:
+                        List<RentalListing> listings = managerService.getListings();
+                        System.out.println("Current listings:");
+                        for (RentalListing l : listings) {
+                            System.out.println(l);
+                        }
+                        break;
                     }
                 }
             }
@@ -38,5 +51,3 @@ public class Worker extends Thread {
         }
     }
 }
-
-
