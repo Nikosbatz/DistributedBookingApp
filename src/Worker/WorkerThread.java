@@ -1,37 +1,42 @@
 package Worker;
 
-import Entities.AccommodationRoom;
-
+import Entities.*;
 import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+
 
 public class WorkerThread implements Runnable{
 
-
-
-
+    Socket client;
     ArrayList<AccommodationRoom> roomsList;
+
     public WorkerThread(Socket client, ArrayList<AccommodationRoom> roomsList ){
         this.roomsList = roomsList;
-
+        this.client = client;
     }
 
     public void run(){
-        Scanner scannerIn = new Scanner(System.in);
 
-        System.out.println("Connection with Worker established...");
-        if (roomsList.isEmpty()){
-            System.out.println("There are no rooms to show...");
-        }
-        System.out.println("Would you like to insert a new room?");
-        if (scannerIn.nextLine().equals("y")){
-            System.out.println("Insert .json for the room you want to register: ");
-            String json = scannerIn.nextLine();
-            System.out.println("PRINTING JSON FOR TESTING PURRPOSES:");
-            System.out.println(json);
+        try{
+            System.out.println("WorkerThread Started!!!");
+            // Instantiating object streams.
+            ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
+            ObjectOutputStream objectOut = new ObjectOutputStream(client.getOutputStream());
+
+            // Reading the method that Client Requested to Master
+            String methodRequested = (String) objectIn.readObject();
+
+            // Reading the .JSON data
+            MessageData message = (MessageData) objectIn.readObject();
+            System.out.println("Method requested: " + methodRequested);
+            System.out.println(message.data);
+
+
+        }catch (IOException | ClassNotFoundException e){
+            e.printStackTrace();
         }
 
     }
 }
+

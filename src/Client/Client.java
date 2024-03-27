@@ -16,21 +16,23 @@ public class Client {
         try {
             Socket socket = new Socket("localhost", 1234);
 
-            // writing to server
+            // Writing to Server
             PrintWriter out = new PrintWriter(
                     socket.getOutputStream(), true);
 
-            // reading from server
+            // Reading from Server
             BufferedReader in
                     = new BufferedReader(new InputStreamReader(
                     socket.getInputStream()));
 
+            // Writing objects to Server
             ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
 
-
+            // Reading Server messages
             System.out.println(in.readLine());
             System.out.println(in.readLine());
 
+            // Instantiating Client input object
             Scanner scannerIn = new Scanner(System.in);
 
             String serverReply ;
@@ -52,11 +54,14 @@ public class Client {
 
                 if (serverReply.equals("Insert json : ")){
                     MessageData jsonData = new MessageData();
+
                     // Reads the json file from the selected directory
                     BufferedReader json = new BufferedReader( new FileReader("C:\\Users\\nikos\\Documents\\GitHub\\DistributedBookingApp\\src\\assets\\room.json"));
                     String line ;
+
                     // read each line of the .json file
                     while ((line = json.readLine()) != null){
+
                         // concatenating the data from the .json file
                         jsonData.data += line;
                     }
@@ -65,8 +70,6 @@ public class Client {
                     objectOutput.writeObject(jsonData);
                     objectOutput.flush();
                 }
-                // Send message object through tcp to the MasterThread
-
             }
 
         }

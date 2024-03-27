@@ -14,29 +14,42 @@ import java.util.*;
 public class Worker {
 
     private static int nextWorkerPort = 1111;
+    final private int port ;
+    private static int nextWorkerId = 1;
+    final private int id;
 
-    static ArrayList<AccommodationRoom> roomsList = new ArrayList<AccommodationRoom>();
+    public ArrayList<AccommodationRoom> roomsList = new ArrayList<AccommodationRoom>();
 
-    public static void main (String[] args){
+    // Default Constructor
+    public Worker(){
+        this.port = getNextWorkerPort();
+        this.id = getNextWorkerId();
+        startWorker();
+    }
 
-        try{
-            ServerSocket workerSocket = new ServerSocket( getNextWorkerPort());
+    public void startWorker (){
 
-            while (true){
+        // Initialize Worker's ServerSocket
+        // Using Threads to accept connections asynchronous
+        new Thread(() -> {
 
-                Socket client = workerSocket.accept();
-                System.out.println("Master IPv4: " + client.getInetAddress());
+            try {
 
-                new Thread(new WorkerThread(client, roomsList)).start();
+                // Opening a ServerSocket to wait for connections
+                ServerSocket workerSocket = new ServerSocket(getPort());
 
+                while (true) {
+                    // Waiting for incoming connections...
+                    Socket client = workerSocket.accept();
+
+                    // Initializing a new thread to handle the MasterThread
+                    new Thread(new WorkerThread(client, roomsList)).start();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-
-
+        }).start();
 
     }
 
@@ -44,4 +57,15 @@ public class Worker {
         return nextWorkerPort++;
     }
 
+    public static int getNextWorkerId() {
+        return nextWorkerId++;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getPort() {
+        return port;
+    }
 }
