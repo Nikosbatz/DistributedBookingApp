@@ -1,4 +1,6 @@
 package Entities;
+import org.json.simple.*;
+
 
 public class AccommodationRoom {
 
@@ -10,11 +12,19 @@ public class AccommodationRoom {
     private String imagePath;
 
 
+    // Create a new instance using a JSONObject object.
+    public AccommodationRoom(JSONObject json){
+        setArea((String)json.get("area"));
+        setCapacity( (long) json.get("capacity"));
+        setName((String) json.get("roomName"));
+        setStars((long)json.get("stars"));
+        setNoOfReviews((long)json.get("noOfReviews"));
+        setImagePath((String)json.get("imagePath"));
+    }
 
 
 
-
-   // Just Getters and Setters below
+    // Just Getters and Setters below
     public String getName() {
         return name;
     }
@@ -35,24 +45,22 @@ public class AccommodationRoom {
         return noOfReviews;
     }
 
-    public void setNoOfReviews(int noOfReviews) {
-        this.noOfReviews = noOfReviews;
-    }
+    public void setNoOfReviews(long noOfReviews) {this.noOfReviews = (int) noOfReviews;}
 
     public int getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
+    public void setCapacity(long capacity) {
+        this.capacity = (int) capacity;
     }
 
     public int getStars() {
         return stars;
     }
 
-    public void setStars(int stars) {
-        this.stars = stars;
+    public void setStars(long stars) {
+        this.stars = (int)stars;
     }
 
     public String getImagePath() {

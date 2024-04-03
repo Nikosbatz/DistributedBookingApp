@@ -13,6 +13,7 @@ public class MessageData implements Serializable {
         this.data = data;
     }
 
+
     public MessageData(){
         this.data = "";
     }

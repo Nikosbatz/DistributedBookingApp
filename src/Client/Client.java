@@ -39,12 +39,9 @@ public class Client {
 
                 System.out.print("Enter message for Master: ");
 
-                // create serializable object to pass through socket
-                MessageData message = new MessageData(scannerIn.nextLine());
-
 
                 // pass the object through the stream
-                objectOut.writeObject(message);
+                objectOut.writeObject(scannerIn.nextLine());
                 objectOut.flush();
 
                 // read server response
@@ -67,10 +64,6 @@ public class Client {
                 if (serverReply.equals("Please insert the JSON for the new room:")){
 
                     insertJSONFile(objectOut, objectIn);
-                }
-                else if (serverReply.equals("Choose filters : ")) {
-
-                    insertFilters(objectOut, scannerIn);
                 }
 
             }
@@ -118,36 +111,6 @@ public class Client {
         }
 
     }
-
-
-    public static void insertFilters(ObjectOutputStream objectOut, Scanner scannerIn){
-
-        try {
-            HashMap<String, String> filters = new HashMap<String, String>();
-            System.out.println("Enter the location (if you don't have a preferance, type 'null'): ");
-            filters.put("area", scannerIn.nextLine());
-            System.out.println("Enter the first date (if you don't have a preferance, type 'null'): ");
-            filters.put("starting date", scannerIn.nextLine());
-            //LocalDate dateStart = LocalDate.parse(tempDate);
-            System.out.println("Enter the last date (if you don't have a preferance, type 'null'): ");
-            filters.put("last area", scannerIn.nextLine());
-            //LocalDate dateEnd = LocalDate.parse(tempDate);
-            System.out.println("Enter the number of people (if you don't have a preferance, type 'null'): ");
-            filters.put("capacity", scannerIn.nextLine());
-            System.out.println("Enter the price (if you don't have a preferance, type 'null'): ");
-            filters.put("price", scannerIn.nextLine());
-            System.out.println("Enter the number of rating stars of the room (if you don't have a preferance, type 'null'): ");
-            filters.put("stars", scannerIn.nextLine());
-            System.out.println("Filtering...");
-
-            objectOut.writeObject(filters);
-            objectOut.flush();
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
 
 
 }

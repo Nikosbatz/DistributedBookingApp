@@ -1,12 +1,13 @@
 package Server;
 
 import Entities.MessageData;
+import Entities.Task;
 import Worker.*;
-import java.awt.print.PrinterException;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
@@ -18,7 +19,7 @@ public class MasterThread implements Runnable{
     private  final ArrayList<Worker> workerslist;
 
 
-    MasterThread(Socket client, ArrayList<Worker> workersList){
+    MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer, Task> taskMap){
         this.client = client;
         this.workerslist = workersList;
     }
@@ -36,11 +37,9 @@ public class MasterThread implements Runnable{
             objectOut.flush();
 
             // read client response
-            String line = ((MessageData)objectIn.readObject()).data;
-            System.out.println(line);
+            String line = (String)objectIn.readObject();
 
             while (line != null){
-
                 if (line.equals("a")){
                     // Manager interface method call
                     runManagerInterface(objectOut, objectIn);
@@ -51,7 +50,6 @@ public class MasterThread implements Runnable{
                     runRenterInterface(objectOut, objectIn);
                     break;
                 }
-                //line = in.readLine();
             }
         }
         catch (IOException | ClassNotFoundException e){
@@ -73,10 +71,10 @@ public class MasterThread implements Runnable{
 
 
             // Read the operation that client wants the server to do.
-            MessageData response = (MessageData) objectIn.readObject();
+            String response = (String) objectIn.readObject();
 
             // Switch for different responses of the client.
-            switch (response.data) {
+            switch (response) {
 
                 // Insert Room
                 case "1":
@@ -86,7 +84,12 @@ public class MasterThread implements Runnable{
 
                     // Reads JSON data from the client.
                     MessageData message = (MessageData) objectIn.readObject();
-                    System.out.println(message.json);
+
+                    // Instantiate new Task object with unique taskID
+                    Task task = new Task();
+                    task.setMethod("insert");
+                    task.setJson(message.json);
+
                     break;
 
                 // Show Current manager's rooms
@@ -116,9 +119,9 @@ public class MasterThread implements Runnable{
         }
 
 
-        System.out.println("asdasdasdasd");
+
         // Establishes connection with Workers
-        ArrayList<Socket> sockets = connectWithWorkers();
+        HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
 
 
@@ -129,75 +132,64 @@ public class MasterThread implements Runnable{
         try {
             Boolean isManager = false;
             objectOut.writeObject("Welcome to renter interface...");
-            //
             objectOut.writeObject("Choose one of the following options.");
             objectOut.writeObject("1. Filter the rooms. \n2. Make a reservation \n3. Rate a room");
             objectOut.writeObject(null);
             objectOut.flush();
 
 
-            String response = ((MessageData)objectIn.readObject()).data;
-            if (response.equals("1")) {
+            String response =(String) objectIn.readObject();
+            switch (response) {
+                case "1" -> {
 
-                // The method that Master will request from Workers
-                String methodRequest = "filter";
+                    // Instantiate new Task object with unique ID
+                    Task task = new Task();
 
-                // Asking client to insert .json file
-                objectOut.writeObject("Choose filters : ");
-                objectOut.writeObject(null);
-                objectOut.flush();
+                    // The method that Master will request from Workers
+                    String methodRequest = "filter";
+                    task.setMethod(methodRequest);
 
-                // Reads filter data from Client.
-                HashMap<String, String> filters = (HashMap<String, String>) objectIn.readObject();
+                    // Asking client to insert filters
+                    objectOut.writeObject("Choose filters : ");
+                    insertFilters(task, objectOut, objectIn);
+
+                    // Establishes connection with Workers
+                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+                    // Sends the Task to every worker Master is aware of
+                    sendTaskToWorkers(task, sockets);
 
 
-                // Establishes connection with Workers
-                ArrayList<Socket> sockets = connectWithWorkers();
-
-
-                for (Socket socket : sockets) {
-                    // Sends to the worker the method that client requests
-                    objectOut.writeBoolean(isManager);
-                    objectOut.writeObject(methodRequest);
-                    objectOut.writeObject(filters);
                 }
-
+                case "2" -> {
+                    //TODO
+                }
+                case "3" -> {
+                    //TODO
+                }
             }
-
-            else if(response.equals("2")){
-                //TODO
-            }
-
-            else if(response.equals("3")){
-                //TODO
-            }
-
-
 
         }
         catch (IOException| ClassNotFoundException e){
             e.printStackTrace();
         }
-
-
-
-
     }
 
 
 
 
     // Establish connection with each Worker that Master has.
-    public ArrayList<Socket> connectWithWorkers(){
+    public HashMap<Socket, ObjectOutputStream> connectWithWorkers(){
 
-        // List of all the connections with Workers
-        ArrayList<Socket> sockets = new ArrayList<Socket>();
-
+        // Map of all the connections with Workers and the OutputStreams to communicate with each one
+        HashMap<Socket, ObjectOutputStream> sockets = new HashMap<>();
+        Socket socket;
         try {
             for (Worker w : workerslist) {
 
                 // Establish a new connection with each of the Workers
-                sockets.add(new Socket("localhost", w.getPort()));
+                socket = new Socket("localhost", w.getPort());
+                sockets.put(socket, new ObjectOutputStream(socket.getOutputStream()));
             }
         }
         catch(IOException e){
@@ -207,4 +199,64 @@ public class MasterThread implements Runnable{
     }
 
 
+
+    public void sendTaskToWorkers(Task task,HashMap<Socket, ObjectOutputStream> sockets){
+
+        for (Socket socket : sockets.keySet()) {
+            try {
+                // Sends to the worker the method that client requests
+                sockets.get(socket).writeObject(task);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+    public static void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
+
+        try {
+
+            objectOut.writeObject("Enter the location (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setAreaFilter((String)objectIn.readObject());
+
+
+            /*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            //task.setAreaFilter((String)objectIn.readObject());
+
+            //LocalDate dateStart = LocalDate.parse(tempDate);
+            objectOut.writeObject("Enter the last date (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setAreaFilter((String)objectIn.readObject());*/
+
+            //LocalDate dateEnd = LocalDate.parse(tempDate);
+
+            objectOut.writeObject("Enter the number of people (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setCapacityFilter( Integer.parseInt((String)objectIn.readObject()));
+
+            objectOut.writeObject("Enter the price (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setPriceFilter( Integer.parseInt((String)objectIn.readObject()));
+
+            objectOut.writeObject("Enter the number of rating stars of the room (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setStarsFilter( Integer.parseInt((String)objectIn.readObject()));
+
+            objectOut.writeObject("Filtering...");
+            objectOut.flush();
+
+
+        }
+        catch (IOException| ClassNotFoundException e){
+            e.printStackTrace();
+        }
+    }
 }

@@ -1,12 +1,15 @@
 package Server;
 
+import Entities.Task;
 import Worker.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Server {
     public static ArrayList<Worker> workersList = new ArrayList<Worker>();
+    public static HashMap<Integer, Task> taskMap = new HashMap<>();
 
     public static void main(String[] args){
 
@@ -30,7 +33,7 @@ public class Server {
                 System.out.println("New client connected" + client.getInetAddress().getHostAddress());
 
                 // New Master Thread for the client
-                new Thread(new MasterThread(client, workersList)).start();
+                new Thread(new MasterThread(client, workersList, taskMap)).start();
             }
 
         }

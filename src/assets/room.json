@@ -4,5 +4,6 @@
 "area": "Area1",
 "stars": 3,
 "noOfReviews": 15,
+"price": 120,
 "roomImage": "/usr/bin/images/roomName.png"
 }

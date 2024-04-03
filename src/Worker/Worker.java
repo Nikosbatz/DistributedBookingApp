@@ -17,12 +17,13 @@ public class Worker {
     private static int nextWorkerId = 1;
     final private int id;
 
-    public HashMap<Integer,AccommodationRoom> roomsMap = new HashMap();
+    public HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
 
     // Default Constructor
     public Worker(){
         this.port = getNextWorkerPort();
         this.id = getNextWorkerId();
+        roomsMap = new HashMap<>();
         startWorker();
     }
 
