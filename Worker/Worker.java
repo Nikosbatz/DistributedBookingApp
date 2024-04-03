@@ -5,7 +5,7 @@ package  Worker;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import Entities.AccommodationRoom;
 
@@ -18,7 +18,7 @@ public class Worker {
     private static int nextWorkerId = 1;
     final private int id;
 
-    public ArrayList<AccommodationRoom> roomsList = new ArrayList<AccommodationRoom>();
+    public HashMap<Integer,AccommodationRoom> roomsMap = new HashMap();
 
     // Default Constructor
     public Worker(){
@@ -43,7 +43,7 @@ public class Worker {
                     Socket client = workerSocket.accept();
 
                     // Initializing a new thread to handle the MasterThread
-                    new Thread(new WorkerThread(client, roomsList)).start();
+                    new Thread(new WorkerThread(client, roomsMap)).start();
                 }
 
             } catch (IOException e) {

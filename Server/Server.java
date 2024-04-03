@@ -1,15 +1,15 @@
 package Server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import Entities.Task;
+import Worker.*;
+import java.io.*;
+import java.net.*;
 import java.util.ArrayList;
-
-import Manager.ManagerService;
-import Worker.Worker;
+import java.util.HashMap;
 
 public class Server {
     public static ArrayList<Worker> workersList = new ArrayList<Worker>();
+    public static HashMap<Integer, Task> taskMap = new HashMap<>();
 
     public static void main(String[] args){
 
@@ -19,18 +19,21 @@ public class Server {
 
         ServerSocket server = null;
         try{
+
+            // Initialize Server Socket and Server Port
             server = new ServerSocket(1234);
+
             // Get server port
             System.out.println(server.getLocalPort());
             System.out.println("Waiting for requests...");
             while (true) {
+
                 // Client connection accept
                 Socket client = server.accept();
-                System.out.println("New client connected" + client.getInetAddress().getHostAddress()+":"+client.getPort());
+                System.out.println("New client connected" + client.getInetAddress().getHostAddress());
 
                 // New Master Thread for the client
-                ManagerService managerService = new ManagerService("..\\src\\assets\\room.json");
-                new Thread(new MasterThread(client, workersList, managerService)).start();
+                new Thread(new MasterThread(client, workersList, taskMap)).start();
             }
 
         }

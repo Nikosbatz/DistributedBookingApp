@@ -1,42 +1,51 @@
 package Worker;
 
-import Entities.*;
-import java.util.ArrayList;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.HashMap;
+import Entities.Task;
+import Entities.AccommodationRoom;
+import org.json.simple.parser.ParseException;
+import java.util.Scanner;
 
 
 public class WorkerThread implements Runnable{
 
     Socket client;
-    ArrayList<AccommodationRoom> roomsList;
+    HashMap<Integer,AccommodationRoom> roomsMap;
 
-    public WorkerThread(Socket client, ArrayList<AccommodationRoom> roomsList ){
-        this.roomsList = roomsList;
+    public WorkerThread(Socket client, HashMap<Integer,AccommodationRoom> roomsList ){
+        this.roomsMap = roomsList;
         this.client = client;
     }
 
-    public void run(){
-
-        try{
+    @Override
+    public void run() {
+        try {
             System.out.println("WorkerThread Started!!!");
-            // Instantiating object streams.
             ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
-            ObjectOutputStream objectOut = new ObjectOutputStream(client.getOutputStream());
 
-            // Reading the method that Client Requested to Master
-            String methodRequested = (String) objectIn.readObject();
+            // Expecting Task object
+            Task task = (Task) objectIn.readObject();
 
-            // Reading the .JSON data
-            MessageData message = (MessageData) objectIn.readObject();
-            System.out.println("Method requested: " + methodRequested);
-            System.out.println(message.data);
+            // Determine action based on the task details
+            switch (task.getMethod()) {
+                case "insert":
 
-
-        }catch (IOException | ClassNotFoundException e){
+                    System.out.println("Attempting to insert object");
+                    // Assuming insert function can handle task directly or modify to pass relevant fields
+                    WorkerFunctions.insert();
+                    break;
+                case "filter":
+                    // Handle filtering logic here
+                    break;
+                // Add cases for other methods as necessary
+            }
+        } catch (IOException | ClassNotFoundException | ParseException e) {
             e.printStackTrace();
         }
-
     }
-}
 
+}

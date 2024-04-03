@@ -1,138 +1,264 @@
 package Server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+import Entities.MessageData;
+import Entities.Task;
+import Worker.*;
+import java.io.*;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import Entities.MessageData;
-import Manager.ManagerService;
-import Manager.RentalListing;
-import Worker.Worker;
 
-public class MasterThread implements Runnable {
+public class MasterThread implements Runnable{
     private Socket client;
-    private final ArrayList<Worker> workerslist;
-    ManagerService managerService;
+    private  final ArrayList<Worker> workerslist;
 
-    MasterThread(Socket client, ArrayList<Worker> workersList, ManagerService managerService) {
+
+    MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer, Task> taskMap){
         this.client = client;
         this.workerslist = workersList;
-        this.managerService = new ManagerService("C:\\Users\\Sotir\\Downloads\\DistributedBookingApp-v-Batz\\DistributedBookingApp-v-Batz\\src\\assets\\room.json");
     }
 
     @Override
-    public void run() {
-        try (
+    public void run(){
+
+        try {
             ObjectOutputStream objectOut = new ObjectOutputStream(client.getOutputStream());
             ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
-        ) {
-            objectOut.writeObject(new MessageData("Hello are you a renter or a manager?\npress (a) for manager OR (b) for renter"));
+
+
+            objectOut.writeObject("Hello are you a renter or a manager?");
+            objectOut.writeObject("press (a) for manager OR (b) for renter");
             objectOut.flush();
 
             // read client response
-            MessageData initialMessage = (MessageData) objectIn.readObject();
-            String line = initialMessage.data;
-            System.out.println(line);
+            String line = (String)objectIn.readObject();
 
-            if ("a".equals(line)) {
-                // Manager interface method call
-                runManagerInterface(objectOut, objectIn);
-            } else {
-                // Renter interface method call
-                runRenterInterface(objectOut, objectIn);
+            while (line != null){
+                if (line.equals("a")){
+                    // Manager interface method call
+                    runManagerInterface(objectOut, objectIn);
+                    break;
+                }
+                else{
+                    // renter interface method call
+                    runRenterInterface(objectOut, objectIn);
+                    break;
+                }
             }
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("debug1");
+        }
+        catch (IOException | ClassNotFoundException e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void runManagerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
+
+        try {
+            Boolean isManager = true;
+            // Prints initial messages to client
+            objectOut.writeObject("Welcome to Manager interface...");
+            objectOut.writeObject("Welcome to manager interface. Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
+            objectOut.writeObject(null);
+            objectOut.flush();
+
+
+            // Read the operation that client wants the server to do.
+            String response = (String) objectIn.readObject();
+
+            // Switch for different responses of the client.
+            switch (response) {
+
+                // Insert Room
+                case "1":
+                    objectOut.writeObject("Please insert the JSON for the new room:");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+
+                    // Reads JSON data from the client.
+                    MessageData message = (MessageData) objectIn.readObject();
+
+                    // Instantiate new Task object with unique taskID
+                    Task task = new Task();
+                    task.setMethod("insert");
+                    task.setJson(message.json);
+                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+                    sendTaskToWorkers(task, sockets);
+
+                    break;
+
+                // Show Current manager's rooms
+                case "2":
+                    // Show all listings
+
+                    break;
+
+                // Exit the manager interface
+                case "3":
+
+                    objectOut.writeObject("Exiting manager interface...");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+                    break;
+
+                // Default option
+                default:
+                    objectOut.writeObject("Invalid option selected. Please try again.");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+                    break;
+            }
+        }
+        catch (IOException | ClassNotFoundException e){
+            e.printStackTrace();
+        }
+
+
+
+        // Establishes connection with Workers
+        HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+
+
+    }
+
+
+    public void runRenterInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
+        try {
+            Boolean isManager = false;
+            objectOut.writeObject("Welcome to renter interface...");
+            objectOut.writeObject("Choose one of the following options.");
+            objectOut.writeObject("1. Filter the rooms. \n2. Make a reservation \n3. Rate a room");
+            objectOut.writeObject(null);
+            objectOut.flush();
+
+
+            String response =(String) objectIn.readObject();
+            switch (response) {
+                case "1" -> {
+
+                    // Instantiate new Task object with unique ID
+                    Task task = new Task();
+
+                    // The method that Master will request from Workers
+                    String methodRequest = "filter";
+                    task.setMethod(methodRequest);
+
+                    // Asking client to insert filters
+                    objectOut.writeObject("Choose filters : ");
+                    insertFilters(task, objectOut, objectIn);
+
+                    // Establishes connection with Workers
+                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+                    // Sends the Task to every worker Master is aware of
+                    sendTaskToWorkers(task, sockets);
+
+
+                }
+                case "2" -> {
+                    //TODO
+                }
+                case "3" -> {
+                    //TODO
+                }
+            }
+
+        }
+        catch (IOException| ClassNotFoundException e){
             e.printStackTrace();
         }
     }
 
-    public void runManagerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn) {
-        boolean running = true;
+
+
+
+    // Establish connection with each Worker that Master has.
+    public HashMap<Socket, ObjectOutputStream> connectWithWorkers(){
+
+        // Map of all the connections with Workers and the OutputStreams to communicate with each one
+        HashMap<Socket, ObjectOutputStream> sockets = new HashMap<>();
+        Socket socket;
         try {
-            while (running) {
-                objectOut.writeObject(new MessageData("Welcome to manager interface. Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit"));
-                objectOut.flush();
+            for (Worker w : workerslist) {
 
-                MessageData response = (MessageData) objectIn.readObject();
-
-                switch (response.data) {
-                    case "1":
-                        objectOut.writeObject(new MessageData("Please insert the JSON for the new room:"));
-                        objectOut.flush();
-
-                        // Reads JSON data from the client.
-                        MessageData message = (MessageData) objectIn.readObject();
-                        addNewRoom(message.data, objectOut);
-                        break;
-                    case "2":
-                        // Show all listings
-                        managerService.showInfo();
-                        break;
-                    case "3":
-                        running = false;
-                        objectOut.writeObject(new MessageData("Exiting manager interface..."));
-                        objectOut.flush();
-                        break;
-                    default:
-                        objectOut.writeObject(new MessageData("Invalid option selected. Please try again."));
-                        objectOut.flush();
-                        break;
-                }
-                objectOut.reset();
+                // Establish a new connection with each of the Workers
+                socket = new Socket("localhost", w.getPort());
+                sockets.put(socket, new ObjectOutputStream(socket.getOutputStream()));
             }
-        } catch (IOException | ClassNotFoundException e) {
-            try {
-                objectOut.writeObject(new MessageData("An error occurred while processing your request."));
-                objectOut.flush();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            running = false;
         }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+        return sockets;
     }
 
-    private void addNewRoom(String jsonData, ObjectOutputStream objectOut) {
+
+
+    public void sendTaskToWorkers(Task task,HashMap<Socket, ObjectOutputStream> sockets){
+
+        for (Socket socket : sockets.keySet()) {
+            try {
+                // Sends to the worker the method that client requests
+                sockets.get(socket).writeObject(task);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+    public static void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
+
         try {
-            JSONParser parser = new JSONParser();
-            JSONObject json = (JSONObject) parser.parse(jsonData);
 
-            String roomName = (String) json.get("roomName");
-            long noOfPersons = (Long) json.get("noOfPersons");
-            String area = (String) json.get("area");
-            long stars = (Long) json.get("stars");
-            long noOfReviews = (Long) json.get("noOfReviews");
-            String roomImage = (String) json.get("roomImage");
-
-            // Instead of reading from a file, directly create a new listing from the JSON data received.
-            RentalListing newListing = new RentalListing(roomName, (int) noOfPersons, area, (int) stars, (int) noOfReviews, roomImage);
-            managerService.addListing(newListing);
-            managerService.showInfo();
-            objectOut.writeObject(new MessageData("New room inserted successfully."));
+            objectOut.writeObject("Enter the location (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
             objectOut.flush();
-        } catch (ParseException | IOException e) {
-            try {
-                objectOut.writeObject(new MessageData("Failed to parse the JSON for the new room."));
-                objectOut.flush();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            task.setAreaFilter((String)objectIn.readObject());
+
+
+            /*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            //task.setAreaFilter((String)objectIn.readObject());
+
+            //LocalDate dateStart = LocalDate.parse(tempDate);
+            objectOut.writeObject("Enter the last date (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setAreaFilter((String)objectIn.readObject());*/
+
+            //LocalDate dateEnd = LocalDate.parse(tempDate);
+
+            objectOut.writeObject("Enter the number of people (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setCapacityFilter( Integer.parseInt((String)objectIn.readObject()));
+
+            objectOut.writeObject("Enter the price (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setPriceFilter( Integer.parseInt((String)objectIn.readObject()));
+
+            objectOut.writeObject("Enter the number of rating stars of the room (if you don't have a preference, type 'null'): ");
+            objectOut.writeObject(null);
+            objectOut.flush();
+            task.setStarsFilter( Integer.parseInt((String)objectIn.readObject()));
+
+            objectOut.writeObject("Filtering...");
+            objectOut.flush();
+
+
         }
-    }
-
-
-    public void runRenterInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn) {
-        // Implement the renter interface similarly using object streams
-    }
-
-    public ArrayList<Socket> connectWithWorkers() {
-        // Your existing implementation
-        return new ArrayList<>(); // Placeholder return to prevent compilation error
+        catch (IOException| ClassNotFoundException e){
+            e.printStackTrace();
+        }
     }
 }
