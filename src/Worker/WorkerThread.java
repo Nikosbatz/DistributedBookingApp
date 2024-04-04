@@ -47,7 +47,7 @@ public class WorkerThread implements Runnable{
 
                     case "show":
                         ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
-                        //TODO Send rooms to REDUCER
+                        WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
                         break;
 
                     default:

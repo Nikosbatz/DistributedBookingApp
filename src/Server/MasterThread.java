@@ -82,7 +82,6 @@ public class MasterThread implements Runnable{
                 // Insert Room
                 case "1":
                     objectOut.writeObject("Please insert the JSON for the new room:");
-                    objectOut.writeObject(null);
                     objectOut.flush();
 
                     // Reads JSON data from the client.
@@ -107,6 +106,7 @@ public class MasterThread implements Runnable{
                     sendTaskToWorkers(task, sockets);
 
                     objectOut.writeObject("Waiting for room to be inserted...");
+                    objectOut.flush();
                     break;
 
                 // Show Current manager's rooms

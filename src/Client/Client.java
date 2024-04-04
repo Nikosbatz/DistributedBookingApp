@@ -49,22 +49,24 @@ public class Client {
 
                 while (true){
 
+                    // Checks if Server is waiting for JSON file
+                    if (serverReply.equals("Please insert the JSON for the new room:")){
+
+                        insertJSONFile(objectOut, objectIn);
+                    }
+
                     // Reads server Responses until server replies with null
                     System.out.println("Server replied: " + serverReply);
                     tempReply = (String)objectIn.readObject();
                     if ( tempReply != null ){
                         serverReply = tempReply;
+
                     }
                     else {
                         break;
                     }
                 }
 
-                // Checks if Server is waiting for JSON file
-                if (serverReply.equals("Please insert the JSON for the new room:")){
-
-                    insertJSONFile(objectOut, objectIn);
-                }
 
             }
 
