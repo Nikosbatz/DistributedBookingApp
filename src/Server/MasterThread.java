@@ -69,6 +69,12 @@ public class MasterThread implements Runnable{
             objectOut.writeObject(null);
             objectOut.flush();
 
+            // Instantiate new Task object with unique taskID
+            Task task = new Task();
+            task.setIsManager(true);
+
+            // sockets connecting Master with Workers
+            HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
             // Read the operation that client wants the server to do.
             String response = (String) objectIn.readObject();
@@ -85,17 +91,35 @@ public class MasterThread implements Runnable{
                     // Reads JSON data from the client.
                     MessageData message = (MessageData) objectIn.readObject();
 
-                    // Instantiate new Task object with unique taskID
-                    Task task = new Task();
+
+
+                    // Choosing Worker Node based on hashCode
+                    long hashCode = (long) message.json.get("roomName").hashCode();
+                    int nodeId =(int) hashCode % workerslist.size();
+
+                    // Set task Attributes
+                    task.setManagerID(1);
                     task.setMethod("insert");
                     task.setJson(message.json);
+                    task.setWorkerID(nodeId);
 
+
+                    // Send task to all the workers that Master is connected to
+                    sendTaskToWorkers(task, sockets);
+
+                    objectOut.writeObject("Waiting for room to be inserted...");
                     break;
 
                 // Show Current manager's rooms
                 case "2":
-                    // Show all listings
 
+                    int managerID = 1;
+                    // Instantiate new Task object with unique taskID
+                    task.setManagerID(managerID);
+                    task.setMethod("show");
+
+                    // Send task to all the workers that Master is connected to
+                    sendTaskToWorkers(task, sockets);
                     break;
 
                 // Exit the manager interface
@@ -117,14 +141,6 @@ public class MasterThread implements Runnable{
         catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
         }
-
-
-
-        // Establishes connection with Workers
-        HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
-
-
-
     }
 
 
@@ -137,13 +153,15 @@ public class MasterThread implements Runnable{
             objectOut.writeObject(null);
             objectOut.flush();
 
+            // Instantiate new Task object with unique ID
+            Task task = new Task();
+
+            // Establishes connection with Workers
+            HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
             String response =(String) objectIn.readObject();
             switch (response) {
                 case "1" -> {
-
-                    // Instantiate new Task object with unique ID
-                    Task task = new Task();
 
                     // The method that Master will request from Workers
                     String methodRequest = "filter";
@@ -153,8 +171,6 @@ public class MasterThread implements Runnable{
                     objectOut.writeObject("Choose filters : ");
                     insertFilters(task, objectOut, objectIn);
 
-                    // Establishes connection with Workers
-                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
                     // Sends the Task to every worker Master is aware of
                     sendTaskToWorkers(task, sockets);
@@ -165,17 +181,39 @@ public class MasterThread implements Runnable{
                     //TODO
                 }
                 case "3" -> {
+                    // Asking user to input the name of the room he wishes to review
+                    objectOut.writeObject("Enter your review (0-5)");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+
+                    // Reading user's input and setting the filter
+                    task.setRoomName((String)objectIn.readObject());
+
+                    // Asking user to input his review of the room
+                    objectOut.writeObject("Enter your review (0-5)");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+
+                    // method
+                    task.setMethod("rate");
+
+                    // Reading user's input and setting the filter
+                    task.setStarsFilter((int)objectIn.readObject());
+
+                    // Send
+                    sendTaskToWorkers(task, sockets);
+
+
+                    objectOut.writeObject("We are uploading your review...");
+
                     //TODO
                 }
             }
-
         }
         catch (IOException| ClassNotFoundException e){
             e.printStackTrace();
         }
     }
-
-
 
 
     // Establish connection with each Worker that Master has.

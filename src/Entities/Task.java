@@ -11,6 +11,9 @@ public class Task implements Serializable {
     public static long nextTaskID = 0;
     private long taskID;
     private String method ;
+    private int WorkerID;
+    private String roomName;
+    private Boolean isManager;
     private int starsFilter ;
     private int priceFilter;
     private int capacityFilter;
@@ -20,6 +23,7 @@ public class Task implements Serializable {
     private int managerID;
 
 
+    // Default constructor setting the unique ID of the task
     public Task(){
         setTaskID();
     }
@@ -90,7 +94,6 @@ public class Task implements Serializable {
 
     public void setTaskID() {
         this.taskID = nextTaskID++;
-
     }
 
     public int getPriceFilter() {
@@ -99,5 +102,29 @@ public class Task implements Serializable {
 
     public void setPriceFilter(int price) {
         this.priceFilter = price;
+    }
+
+    public Boolean getIsManager() {
+        return isManager;
+    }
+
+    public void setIsManager(Boolean isManager) {
+        this.isManager = isManager;
+    }
+
+    public int getWorkerID() {
+        return WorkerID;
+    }
+
+    public void setWorkerID(int workerID) {
+        WorkerID = workerID;
+    }
+
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
     }
 }

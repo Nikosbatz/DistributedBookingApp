@@ -11,8 +11,10 @@ import java.util.HashMap;
 public class WorkerThread implements Runnable{
 
     Socket client;
+    int WorkerID;
     public HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
-    public WorkerThread(Socket client, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap ){
+    public WorkerThread(int WorkerID, Socket client, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap ){
+        this.WorkerID = WorkerID;
         this.roomsMap = roomsMap;
         this.client = client;
     }
@@ -26,42 +28,52 @@ public class WorkerThread implements Runnable{
             ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
             ObjectOutputStream objectOut = new ObjectOutputStream(client.getOutputStream());
 
-            // Reads the type of user (Manager OR Renter)
-            Boolean isManager =  objectIn.readBoolean();
+            // Reads the task from Master
+            Task task = (Task) objectIn.readObject();
 
-            // Reading the method that Client Requested to Master
-            String methodRequested = (String) objectIn.readObject();
+            // If the task is sent from manager interface
+            if (task.getIsManager()){
 
-            System.out.println(methodRequested);
-
-            if (isManager){
-
-                switch (methodRequested){
+                switch (task.getMethod()){
                     case "insert":
-                        //TODO
+                        if (task.getWorkerID() == this.WorkerID) {
+                            WorkerFunctions.insert(task, roomsMap);
+                        }
+                        //TODO Needs synchronizing
                         break;
 
                     case "show":
-                        //TODO
+                        ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
+                        //TODO Send rooms to REDUCER
                         break;
 
                     default:
                         break;
                 }
-
             }
+            // If the task is sent from renter interface
             else {
-
-                switch (methodRequested) {
+                switch (task.getMethod()) {
                     case "filter":
                         //TODO
 
-                        // Reading arguments from Master
-                        HashMap<String, String> filters =  (HashMap<String, String>) objectIn.readObject();
                         break;
 
                     case "rate":
-                        //TODO
+
+                        // Check if the room about to be reviewed belongs to this Worker's storage
+                        for(int managerId: roomsMap.keySet()){
+                            ArrayList<AccommodationRoom> rooms = roomsMap.get(managerId);
+                            for (AccommodationRoom room: rooms){
+                                // If room is stored in this Worker
+                                if (room.getName().equals(task.getRoomName())){
+                                    // add the review to the room
+                                    room.addReview(task.getStarsFilter());
+                                }
+                            }
+                        }
+
+                        //TODO Synchronize
                         break;
 
                     case "book":

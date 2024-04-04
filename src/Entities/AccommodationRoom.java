@@ -6,10 +6,12 @@ public class AccommodationRoom {
 
     private String name;
     private  int capacity;
+    private int price;
     private String area;
     private int stars;
     private int noOfReviews;
     private String imagePath;
+    private int owner;
 
 
     // Create a new instance using a JSONObject object.
@@ -19,10 +21,18 @@ public class AccommodationRoom {
         setName((String) json.get("roomName"));
         setStars((long)json.get("stars"));
         setNoOfReviews((long)json.get("noOfReviews"));
+        setPrice((long) json.get("price"));
         setImagePath((String)json.get("imagePath"));
     }
 
 
+
+    public void addReview(int review){
+        int sum = getNoOfReviews() * getStars();
+        sum += review;
+        setNoOfReviews(getNoOfReviews()+1);
+        setStars(sum/getNoOfReviews());
+    }
 
     // Just Getters and Setters below
     public String getName() {
@@ -69,5 +79,17 @@ public class AccommodationRoom {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public int getPrice() {return price;}
+
+    public void setPrice(long price) {this.price = (int)price;}
+
+    public int getOwner() {
+        return owner;
+    }
+
+    public void setOwner(int owner) {
+        this.owner = owner;
     }
 }

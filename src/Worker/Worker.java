@@ -14,7 +14,7 @@ public class Worker {
 
     private static int nextWorkerPort = 1111;
     final private int port ;
-    private static int nextWorkerId = 1;
+    private static int nextWorkerId = 0;
     final private int id;
 
     public HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
@@ -43,7 +43,7 @@ public class Worker {
                     Socket client = workerSocket.accept();
 
                     // Initializing a new thread to handle the MasterThread
-                    new Thread(new WorkerThread(client, roomsMap)).start();
+                    new Thread(new WorkerThread(id, client, roomsMap)).start();
                 }
 
             } catch (IOException e) {
