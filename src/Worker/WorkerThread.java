@@ -31,6 +31,9 @@ public class WorkerThread implements Runnable{
             // Reads the task from Master
             Task task = (Task) objectIn.readObject();
 
+            // Connects With Reducer
+            Socket Reducer = WorkerFunctions.connectWithReducer();
+
             // If the task is sent from manager interface
             if (task.getIsManager()){
 
@@ -39,7 +42,7 @@ public class WorkerThread implements Runnable{
                         if (task.getWorkerID() == this.WorkerID) {
                             WorkerFunctions.insert(task, roomsMap);
                         }
-                        //TODO Needs synchronizing
+
                         break;
 
                     case "show":
@@ -67,17 +70,22 @@ public class WorkerThread implements Runnable{
                             for (AccommodationRoom room: rooms){
                                 // If room is stored in this Worker
                                 if (room.getName().equals(task.getRoomName())){
-                                    // add the review to the room
-                                    room.addReview(task.getStarsFilter());
+                                    // This block is synchronized
+                                    synchronized (this) {
+                                        System.out.println("Before adding" + room.getStars());
+                                        // add the review to the room
+                                        room.addReview(task.getStarsFilter());
+                                        System.out.println("After adding" + room.getStars());
+                                    }
                                 }
+
                             }
                         }
-
-                        //TODO Synchronize
                         break;
 
                     case "book":
                         //TODO
+                        //TODO synchronization
                         break;
 
                     default:

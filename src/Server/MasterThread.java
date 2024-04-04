@@ -7,21 +7,18 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
-
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 
 public class MasterThread implements Runnable{
     private Socket client;
-    private  final ArrayList<Worker> workerslist;
+    private  final ArrayList<Worker> workersList;
+    private HashMap<Integer, Task> taskMap;
 
 
     MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer, Task> taskMap){
         this.client = client;
-        this.workerslist = workersList;
+        this.workersList = workersList;
+        this.taskMap = taskMap;
     }
 
     @Override
@@ -65,7 +62,7 @@ public class MasterThread implements Runnable{
             Boolean isManager = true;
             // Prints initial messages to client
             objectOut.writeObject("Welcome to Manager interface...");
-            objectOut.writeObject("Welcome to manager interface. Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
+            objectOut.writeObject("Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
             objectOut.writeObject(null);
             objectOut.flush();
 
@@ -95,7 +92,7 @@ public class MasterThread implements Runnable{
 
                     // Choosing Worker Node based on hashCode
                     long hashCode = (long) message.json.get("roomName").hashCode();
-                    int nodeId =(int) hashCode % workerslist.size();
+                    int nodeId =(int) hashCode % workersList.size();
 
                     // Set task Attributes
                     task.setManagerID(1);
@@ -103,6 +100,8 @@ public class MasterThread implements Runnable{
                     task.setJson(message.json);
                     task.setWorkerID(nodeId);
 
+                    // Add task to the queue of pending tasks
+                    taskMap.put((int)task.getTaskID(), task);
 
                     // Send task to all the workers that Master is connected to
                     sendTaskToWorkers(task, sockets);
@@ -206,7 +205,7 @@ public class MasterThread implements Runnable{
 
                     objectOut.writeObject("We are uploading your review...");
 
-                    //TODO
+
                 }
             }
         }
@@ -223,7 +222,7 @@ public class MasterThread implements Runnable{
         HashMap<Socket, ObjectOutputStream> sockets = new HashMap<>();
         Socket socket;
         try {
-            for (Worker w : workerslist) {
+            for (Worker w : workersList) {
 
                 // Establish a new connection with each of the Workers
                 socket = new Socket("localhost", w.getPort());
@@ -239,7 +238,10 @@ public class MasterThread implements Runnable{
 
 
     public void sendTaskToWorkers(Task task,HashMap<Socket, ObjectOutputStream> sockets){
+        // add task to the queue of pending tasks
+        this.taskMap.put((int)task.getTaskID(), task);
 
+        // Send task to each Worker
         for (Socket socket : sockets.keySet()) {
             try {
                 // Sends to the worker the method that client requests
@@ -250,7 +252,7 @@ public class MasterThread implements Runnable{
             }
         }
     }
-    public static void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
+    public void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
 
         try {
 

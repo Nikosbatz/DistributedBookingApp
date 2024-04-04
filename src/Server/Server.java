@@ -23,14 +23,13 @@ public class Server {
             // Initialize Server Socket and Server Port
             server = new ServerSocket(1234);
 
-            // Get server port
-            System.out.println(server.getLocalPort());
+
             System.out.println("Waiting for requests...");
             while (true) {
 
                 // Client connection accept
                 Socket client = server.accept();
-                System.out.println("New client connected" + client.getInetAddress().getHostAddress());
+                System.out.println("New client connected!");
 
                 // New Master Thread for the client
                 new Thread(new MasterThread(client, workersList, taskMap)).start();
