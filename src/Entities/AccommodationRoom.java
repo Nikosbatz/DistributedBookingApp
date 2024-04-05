@@ -1,6 +1,11 @@
 package Entities;
 import org.json.simple.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 public class AccommodationRoom {
 
@@ -13,6 +18,7 @@ public class AccommodationRoom {
     private String imagePath;
     private int owner;
 
+    private HashMap<String,String> availiableDates = new HashMap<String,String>();
 
     // Create a new instance using a JSONObject object.
     public AccommodationRoom(JSONObject json){
@@ -92,4 +98,33 @@ public class AccommodationRoom {
     public void setOwner(int owner) {
         this.owner = owner;
     }
+
+
+
+    public ArrayList<String> getDatesFirst(){           //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        ArrayList<String> datesFirst = new ArrayList<>();
+        for (String date: availiableDates.keySet()){
+            datesFirst.add(date);
+
+        }
+        return datesFirst;
+    }
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-mm-yyyy");
+    private Date availDateFirst;
+    private Date availDateLast;
+    public boolean isAvailiable(Date dateFirst, Date dateLast) throws ParseException {            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //return true;
+        for (String date: availiableDates.keySet()){
+            availDateFirst = simpleDateFormat.parse(date);
+            availDateLast = simpleDateFormat.parse(availiableDates.get(date));
+
+            return ( (dateFirst.after(availDateFirst) || dateFirst.compareTo(availDateLast) == 0)
+                    && (dateLast.before(availDateLast) || dateLast.compareTo(availDateLast) == 0)
+            );
+        }
+
+        return false;
+    }
+
 }

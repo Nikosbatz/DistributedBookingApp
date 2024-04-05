@@ -58,9 +58,14 @@ public class WorkerThread implements Runnable{
             else {
                 switch (task.getMethod()) {
                     case "filter":
-                        //TODO
-
-                        break;
+                        try {
+                            ArrayList<AccommodationRoom> filteredRooms = WorkerFunctions.filterRooms(task, roomsMap);
+                            WorkerFunctions.sendResultToReducer(Reducer, (int) task.getTaskID(), filteredRooms);
+                            break;
+                        }
+                        catch (java.text.ParseException e){
+                            e.printStackTrace();
+                        }
 
                     case "rate":
 

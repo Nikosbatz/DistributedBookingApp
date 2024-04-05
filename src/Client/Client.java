@@ -52,7 +52,7 @@ public class Client {
                     // Checks if Server is waiting for JSON file
                     if (serverReply.equals("Please insert the JSON for the new room:")){
 
-                        insertJSONFile(objectOut, objectIn);
+                        insertJSONFile(objectOut, objectIn, scannerIn);
                     }
 
                     // Reads server Responses until server replies with null
@@ -79,12 +79,15 @@ public class Client {
 
 
 
-    public static void  insertJSONFile (ObjectOutputStream objectOut, ObjectInputStream objectIn){
+    public static void  insertJSONFile (ObjectOutputStream objectOut, ObjectInputStream objectIn, Scanner scannerIn){
         try {
             String jsonData = "";
 
+            System.out.print("Enter .JSON file name: ");
+            String jsonPath = scannerIn.nextLine();
+
             // Reads the json file from the selected directory
-            BufferedReader jsonFile = new BufferedReader(new FileReader("C:\\Users\\nikos\\Documents\\GitHub\\DistributedBookingApp_main\\src\\assets\\room.json"));
+            BufferedReader jsonFile = new BufferedReader(new FileReader("C:\\Users\\nikos\\Documents\\GitHub\\DistributedBookingApp_main\\src\\assets\\" + jsonPath + ".json"));
             String line;
 
             // read each line of the .json file

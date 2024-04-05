@@ -1,11 +1,12 @@
 package Entities;
 
 import java.io.Serializable;
-import java.security.PublicKey;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 
 public class Task implements Serializable {
     public static long nextTaskID = 0;
@@ -21,6 +22,11 @@ public class Task implements Serializable {
     private int threadId;
     private JSONObject json;
     private int managerID;
+    private Date dateFirst;
+
+    private Date dateLast;
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-mm-yyyy");
 
 
     // Default constructor setting the unique ID of the task
@@ -127,4 +133,23 @@ public class Task implements Serializable {
     public void setRoomName(String roomName) {
         this.roomName = roomName;
     }
+
+    public Date getDateFirst() {
+        return dateFirst;
+    }
+
+    public void setDateFirst(String dateFirst) throws java.text.ParseException {
+        this.dateFirst = simpleDateFormat.parse(dateFirst);
+    }
+
+    public Date getDateLast() {
+        return dateLast;
+    }
+
+    public void setDateLast(String dateLast) throws java.text.ParseException {
+        this.dateLast = simpleDateFormat.parse(dateLast);
+    }
+
+
 }
+

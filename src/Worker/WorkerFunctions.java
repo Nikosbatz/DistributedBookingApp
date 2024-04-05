@@ -22,6 +22,29 @@ public class WorkerFunctions {
     }
 
 
+
+    public static ArrayList<AccommodationRoom> filterRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap) throws java.text.ParseException {
+        ArrayList<AccommodationRoom> filteredRooms = new ArrayList<>();
+        synchronized (roomsMap) {
+            for (ArrayList<AccommodationRoom> rooms : roomsMap.values()) {
+                for (AccommodationRoom room : rooms) {
+                    // This block is synchronized
+                    if ((task.getAreaFilter() == null || room.getArea().equals(task.getAreaFilter())
+                            && (task.getCapacityFilter() == 0 || room.getCapacity() >= task.getCapacityFilter())
+                            && (task.getPriceFilter() == 0 || room.getPrice() <= task.getPriceFilter())
+                            && (task.getStarsFilter() == 0 || room.getStars() >= task.getStarsFilter())
+                            && room.isAvailiable(task.getDateFirst(), task.getDateLast())
+                    )) {
+                        filteredRooms.add(room);
+                    }
+                }
+            }
+        }
+
+        return filteredRooms;
+    }
+
+
     public static ArrayList<AccommodationRoom> showManagerRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
         return roomsMap.get(task.getManagerID());
     }

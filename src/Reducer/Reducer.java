@@ -10,15 +10,15 @@ import java.util.*;
 
 public class Reducer {
 
-    private static ArrayList<Thread> threads ;
+
     private static HashMap<Integer, ArrayList<AccommodationRoom>> results;
     private final int WorkersNum = 1;
 
 
     public static void main(String[] args){
 
-        threads = new ArrayList<>();
-        results = new HashMap<>();
+
+        results = new HashMap <>();
         ServerSocket server = null;
         try{
 
