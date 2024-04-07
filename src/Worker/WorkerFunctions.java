@@ -63,7 +63,10 @@ public class WorkerFunctions {
     public static void sendResultToReducer(Socket Reducer, int taskID, ArrayList<AccommodationRoom> result) {
         try {
             ObjectOutputStream objectOut = new ObjectOutputStream(Reducer.getOutputStream());
-            objectOut.writeObject(new HashMap<Integer, ArrayList<AccommodationRoom>>().put(taskID, result));
+            HashMap<Integer, ArrayList<AccommodationRoom>> map = new HashMap<>();
+            map.put(taskID, result);
+            System.out.println("TaskID: " + taskID);
+            objectOut.writeObject(map);
 
         }
         catch (IOException e){

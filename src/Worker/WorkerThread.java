@@ -41,12 +41,14 @@ public class WorkerThread implements Runnable{
                     case "insert":
                         if (task.getWorkerID() == this.WorkerID) {
                             WorkerFunctions.insert(task, roomsMap);
+
                         }
 
                         break;
 
                     case "show":
                         ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
+                        System.out.println(rooms.size() + "asdasda");
                         WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
                         break;
 

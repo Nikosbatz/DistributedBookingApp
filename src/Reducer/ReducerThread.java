@@ -33,6 +33,7 @@ public class ReducerThread implements Runnable{
             // Get the result of an operation from a Worker
             HashMap<Integer, ArrayList<AccommodationRoom>> result = (HashMap<Integer, ArrayList<AccommodationRoom>>) objectIn.readObject();
 
+            System.out.println(result.size());
             synchronized (results) {
                 // Using for to get the key from the HashMap
                 for (int key : result.keySet()) {
@@ -48,6 +49,8 @@ public class ReducerThread implements Runnable{
                     }
                 }
             }
+
+            System.out.println(results.get(1).getLast().getName());
 
 
         }

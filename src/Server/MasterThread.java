@@ -38,14 +38,18 @@ public class MasterThread implements Runnable{
 
             while (line != null){
                 if (line.equals("a")){
-                    // Manager interface method call
+                    // MANAGER interface method call
                     runManagerInterface(objectOut, objectIn);
                     break;
                 }
-                else{
-                    // renter interface method call
+                else if (line.equals("b")){
+                    // RENTER interface method call
                     runRenterInterface(objectOut, objectIn);
                     break;
+                }
+                else{
+                    // REDUCER interface method call
+                    //TODO
                 }
             }
         }

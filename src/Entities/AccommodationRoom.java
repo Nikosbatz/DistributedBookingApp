@@ -1,13 +1,14 @@
 package Entities;
 import org.json.simple.*;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-public class AccommodationRoom {
+public class AccommodationRoom implements Serializable {
 
     private String name;
     private  int capacity;

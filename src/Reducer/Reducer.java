@@ -12,14 +12,21 @@ public class Reducer {
 
 
     private static HashMap<Integer, ArrayList<AccommodationRoom>> results;
-    private final int WorkersNum = 1;
 
 
     public static void main(String[] args){
 
-
+        // Initializing variables
         results = new HashMap <>();
         ServerSocket server = null;
+        int workersNum = 1;
+
+        // Instantiate and start a Daemon Thread
+        Thread daemon = new Thread(new ReducerDaemonThread(workersNum, results ));
+        daemon.setDaemon(true);
+        daemon.start();
+
+
         try{
 
             // Initialize Server Socket and Server Port
