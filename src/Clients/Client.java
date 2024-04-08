@@ -1,4 +1,4 @@
-package Client;
+package Clients;
 
 import Entities.MessageData;
 import org.json.simple.JSONObject;
@@ -8,7 +8,6 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.net.Socket;
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 

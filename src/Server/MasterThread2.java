@@ -1,5 +1,6 @@
 package Server;
 
+import Entities.AccommodationRoom;
 import Entities.MessageData;
 import Entities.Task;
 import Worker.*;
@@ -9,16 +10,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class MasterThread implements Runnable{
+public class MasterThread2 implements Runnable{
     private Socket client;
     private  final ArrayList<Worker> workersList;
     private HashMap<Integer, Task> taskMap;
+    HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks;
 
 
-    public MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer, Task> taskMap){
+    public MasterThread2(Socket client, ArrayList<Worker> workersList, HashMap<Integer,
+                        Task> taskMap, HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks)
+    {
         this.client = client;
         this.workersList = workersList;
         this.taskMap = taskMap;
+        this.completedTasks = completedTasks;
     }
 
     @Override
@@ -53,91 +58,64 @@ public class MasterThread implements Runnable{
             e.printStackTrace();
         }
 
-
     }
+
 
     public void runManagerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
 
         try {
-            Boolean isManager = true;
-            // Prints initial messages to client
-            objectOut.writeObject("Welcome to Manager interface...");
-            objectOut.writeObject("Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
-            objectOut.writeObject(null);
-            objectOut.flush();
 
-            // Instantiate new Task object with unique taskID
-            Task task = new Task();
-            task.setIsManager(true);
+            // Receive Task from Client
+            Task task = (Task)objectIn.readObject();
 
-            // sockets connecting Master with Workers
-            HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+            // Add task to the queue of pending tasks
+            taskMap.put((int)task.getTaskID(), task);
 
-            // Read the operation that client wants the server to do.
-            String response = (String) objectIn.readObject();
+            // If method of Task is "insert"
+            if ( task.getMethod().equals("insert")) {
 
-            // Switch for different responses of the client.
-            switch (response) {
-
-                // Insert Room
-                case "1":
-                    objectOut.writeObject("Please insert the JSON for the new room:");
-                    objectOut.flush();
-
-                    // Reads JSON data from the client.
-                    MessageData message = (MessageData) objectIn.readObject();
-
-
-
-                    // Choosing Worker Node based on hashCode
-                    long hashCode = (long) message.json.get("roomName").hashCode();
-                    int nodeId =(int) hashCode % workersList.size();
-
-                    // Set task Attributes
-                    task.setManagerID(1);
-                    task.setMethod("insert");
-                    task.setJson(message.json);
-                    task.setWorkerID(nodeId);
-
-                    // Add task to the queue of pending tasks
-                    taskMap.put((int)task.getTaskID(), task);
-
-                    // Send task to all the workers that Master is connected to
-                    sendTaskToWorkers(task, sockets);
-
-                    objectOut.writeObject("Waiting for room to be inserted...");
-                    objectOut.flush();
-                    break;
-
-                // Show Current manager's rooms
-                case "2":
-
-                    int managerID = 1;
-                    // Instantiate new Task object with unique taskID
-                    task.setManagerID(managerID);
-                    task.setMethod("show");
-
-                    // Send task to all the workers that Master is connected to
-                    sendTaskToWorkers(task, sockets);
-                    break;
-
-                // Exit the manager interface
-                case "3":
-
-                    objectOut.writeObject("Exiting manager interface...");
-                    objectOut.writeObject(null);
-                    objectOut.flush();
-                    break;
-
-                // Default option
-                default:
-                    objectOut.writeObject("Invalid option selected. Please try again.");
-                    objectOut.writeObject(null);
-                    objectOut.flush();
-                    break;
+                // Choosing Worker Node based on hashCode
+                long hashCode = (long) task.getJson().get("roomName").hashCode();
+                int WorkerId = (int) hashCode % workersList.size();
+                task.setWorkerID(WorkerId);
+                for (Worker w : workersList){
+                    if (w.getId() == task.getWorkerID()){
+                        // Send insert Task to specific Worker based on Hashing
+                       Socket socket = new Socket("localhost", w.getPort());
+                       ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                       out.writeObject(task);
+                       out.close();
+                    }
+                }
             }
+            else {
+
+                // sockets connecting Master with Workers
+                HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+                // Send task to all the workers that Master is connected to
+                sendTaskToWorkers(task, sockets);
+            }
+
+            ArrayList<AccommodationRoom> results;
+            while(true) {
+                synchronized (completedTasks) {
+
+                    // Wait for a new entry on the completedTasks HashMap
+                    completedTasks.wait();
+
+                    // If there is a key == taskID then break loop
+                    if (completedTasks.get((int) task.getTaskID()) != null) {
+                        results = completedTasks.get((int) task.getTaskID());
+                        completedTasks.remove((int)task.getTaskID());
+                        break;
+                    }
+                }
+            }
+            objectOut.writeObject(results);
+
         }
-        catch (IOException | ClassNotFoundException e){
+        catch (IOException | ClassNotFoundException | InterruptedException e){
             e.printStackTrace();
         }
     }

@@ -25,7 +25,7 @@ public class ReducerDaemonThread implements Runnable{
         while(true){
             for (int key: results.keySet()){
                 if(results.get(key).size() == WorkersNum){
-
+                    sendResultToMaster(key);
                 }
             }
         }

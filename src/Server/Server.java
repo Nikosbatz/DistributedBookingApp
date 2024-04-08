@@ -1,5 +1,6 @@
 package Server;
 
+import Entities.AccommodationRoom;
 import Entities.Task;
 import Worker.*;
 import java.io.*;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 public class Server {
     public static ArrayList<Worker> workersList = new ArrayList<Worker>();
     public static HashMap<Integer, Task> taskMap = new HashMap<>();
+    public static HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks = new HashMap<>();
 
     public static void main(String[] args){
 
