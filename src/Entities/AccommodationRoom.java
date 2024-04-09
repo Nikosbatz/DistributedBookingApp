@@ -109,7 +109,7 @@ public class AccommodationRoom implements Serializable {
 
 
     
-    public boolean isAvailable(LocalDate dateFirst, LocalDate dateLast) throws ParseException {
+    public boolean isAvailable(LocalDate dateFirst, LocalDate dateLast) {
         LocalDate availDateFirst;
         LocalDate availDateLast;
         for (LocalDate date: availableDates.keySet()){
