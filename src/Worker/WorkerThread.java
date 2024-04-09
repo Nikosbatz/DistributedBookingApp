@@ -97,7 +97,7 @@ public class WorkerThread implements Runnable{
                             for (AccommodationRoom room: rooms) {
                                 // If room is stored in this Worker
                                 if (room.getName().equals(task.getRoomName())) {
-                                    WorkerFunctions.bookARoom(task, room);
+                                    WorkerFunctions.bookAroom(task, room);
                                 }
                             }
                         }
