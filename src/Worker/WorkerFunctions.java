@@ -76,7 +76,7 @@ public class WorkerFunctions {
     }
 
 
-    public static void bookARoom(Task task, AccommodationRoom room) throws ParseException {
+    public static void bookAroom(Task task, AccommodationRoom room) throws ParseException {
         LocalDate availDateFirst;
         LocalDate availDateLast;
         synchronized (room) {
