@@ -68,6 +68,7 @@ public class MasterThread2 implements Runnable{
             // Receive Task from Client
             Task task = (Task)objectIn.readObject();
 
+            task.setIsManager(true);
             // Add task to the queue of pending tasks
             taskMap.put((int)task.getTaskID(), task);
 

@@ -34,7 +34,7 @@ public class Server {
                 System.out.println("New client connected!");
 
                 // New Master Thread for the client
-                new Thread(new MasterThread(client, workersList, taskMap)).start();
+                new Thread(new MasterThread2(client, workersList, taskMap, completedTasks)).start();
             }
 
         }
