@@ -30,7 +30,7 @@ public class WorkerFunctions {
             for (ArrayList<AccommodationRoom> rooms : roomsMap.values()) {
                 for (AccommodationRoom room : rooms) {
                     // This block is synchronized
-                    if ((task.getAreaFilter() == "null" || room.getArea().equals(task.getAreaFilter())
+                    if ((task.getAreaFilter().equals("null") || room.getArea().equals(task.getAreaFilter())
                             && (task.getCapacityFilter() == 0 || room.getCapacity() >= task.getCapacityFilter())
                             && (task.getPriceFilter() == 0 || room.getPrice() <= task.getPriceFilter())
                             && (task.getStarsFilter() == 0 || room.getStars() >= task.getStarsFilter())
