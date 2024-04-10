@@ -1,7 +1,6 @@
 package Reducer;
 
 import Entities.AccommodationRoom;
-import Server.MasterThread;
 import Worker.Worker;
 
 import java.io.*;

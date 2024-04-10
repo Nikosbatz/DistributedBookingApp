@@ -5,10 +5,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+
 import java.io.IOException;
 import java.net.Socket;
 import java.io.*;
 import java.util.*;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+
 public class RenterApp {
 
     public static void main(String[] args) {
@@ -30,6 +34,7 @@ public class RenterApp {
             objectOut.writeObject("renter");
 
             System.out.println("Welcome\nChoose an option: \n1. Filter the rooms. \n2. Make a booking \n3. Rate a room");
+            System.out.print("Enter your choice: ");
             String response = scannerIn.nextLine();
 
             // Instantiating new Task object
@@ -51,11 +56,41 @@ public class RenterApp {
 
                     // Waiting for Master response
                     System.out.println("Waiting for Server...");
+
                     masterResponse = (String)objectIn.readObject();
 
                 }
                 case "2" -> {
-                    //TODO
+                    // Asking user to input the name of the room he wishes to book
+                    System.out.println("Which room do you wish to book?");
+
+                    // Reading user's input and setting the filter
+                    task.setRoomName(scannerIn.nextLine());
+
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    // Asking user to input the check-IN date he wishes for
+                    System.out.println("Enter the check-in date ( in form of dd-mm-yyyy )");
+                    String reply = scannerIn.nextLine();
+                    LocalDate dateFirst = LocalDate.parse(reply, formatter);
+                    task.setDateFirst(dateFirst);
+
+                    // Asking user to input the check-OUT date he wishes for
+                    System.out.println("Enter the check-out date ( in form of dd-mm-yyyy )");
+                    reply = scannerIn.nextLine();
+                    LocalDate dateLast = LocalDate.parse(reply, formatter);
+                    task.setDateLast(dateLast);
+
+                    // Set method
+                    task.setMethod("book");
+
+                    // Send Task to Master
+                    objectOut.writeObject(task);
+
+                    // Waiting for Master response
+                    System.out.println("Waiting for Server...");
+
+                    //masterResponse = (String)objectIn.readObject();
                 }
                 case "3" -> {
                     // Asking user to input the name of the room he wishes to review
@@ -76,7 +111,8 @@ public class RenterApp {
 
                     // Waiting for Master response
                     System.out.println("Waiting for Server...");
-                    masterResponse = (String)objectIn.readObject();
+
+                    //masterResponse = (String)objectIn.readObject();
 
                 }
             }
@@ -84,13 +120,13 @@ public class RenterApp {
 
 
         }
-        catch (IOException | ClassNotFoundException e){
+        catch (IOException | ClassNotFoundException | ParseException e){
             e.printStackTrace();
         }
     }
 
 
-    public static void insertFilters(Task task, Scanner scannerIn){
+    public static void insertFilters(Task task, Scanner scannerIn) throws ParseException {
 
 
 
@@ -99,30 +135,27 @@ public class RenterApp {
 
         task.setAreaFilter(scannerIn.nextLine());
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        System.out.println("Enter the first date in form of dd-mm-yyyy (if you don't have a preference, type 'null'): ");
+        String reply = scannerIn.nextLine();
+        LocalDate dateFirst = LocalDate.parse(reply, formatter);
+        task.setDateFirst(dateFirst);
 
-        /*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
-        objectOut.writeObject(null);
-        objectOut.flush();
-        //task.setAreaFilter((String)objectIn.readObject());
+        System.out.println("Enter the last date in form of dd-mm-yyyy (if you don't have a preference, type 'null'): ");
+        reply = scannerIn.nextLine();
+        LocalDate dateLast = LocalDate.parse(reply, formatter);
+        task.setDateLast(dateLast);
 
-        //LocalDate dateStart = LocalDate.parse(tempDate);
-        objectOut.writeObject("Enter the last date (if you don't have a preference, type 'null'): ");
-        objectOut.writeObject(null);
-        objectOut.flush();
-        task.setAreaFilter((String)objectIn.readObject());*/
-
-        //LocalDate dateEnd = LocalDate.parse(tempDate);
-
-        System.out.println("Enter the number of people (if you don't have a preference, type 'null'): ");
+        System.out.println("Enter the number of people (if you don't have a preference, type '0'): ");
 
 
         task.setCapacityFilter( Integer.parseInt(scannerIn.nextLine()));
 
-        System.out.println("Enter the price (if you don't have a preference, type 'null'): ");
+        System.out.println("Enter the price (if you don't have a preference, type '0'): ");
 
         task.setPriceFilter( Integer.parseInt(scannerIn.nextLine()));
 
-        System.out.println("Enter the number of rating stars of the room (if you don't have a preference, type 'null'): ");
+        System.out.println("Enter the number of rating stars of the room (if you don't have a preference, type '0'): ");
 
         task.setStarsFilter( Integer.parseInt(scannerIn.nextLine()));
 

@@ -6,6 +6,7 @@ import java.util.Date;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import java.time.LocalDate;
 
 
 public class Task implements Serializable {
@@ -22,11 +23,10 @@ public class Task implements Serializable {
     private int threadId;
     private JSONObject json;
     private int managerID;
-    private Date dateFirst;
+    private LocalDate  dateFirst;
 
-    private Date dateLast;
+    private LocalDate  dateLast;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-mm-yyyy");
 
 
     // Default constructor setting the unique ID of the task
@@ -134,20 +134,20 @@ public class Task implements Serializable {
         this.roomName = roomName;
     }
 
-    public Date getDateFirst() {
+    public LocalDate getDateFirst() {
         return dateFirst;
     }
 
-    public void setDateFirst(String dateFirst) throws java.text.ParseException {
-        this.dateFirst = simpleDateFormat.parse(dateFirst);
+    public void setDateFirst(LocalDate dateFirst) {
+        this.dateFirst = dateFirst;
     }
 
-    public Date getDateLast() {
+    public LocalDate getDateLast() {
         return dateLast;
     }
 
-    public void setDateLast(String dateLast) throws java.text.ParseException {
-        this.dateLast = simpleDateFormat.parse(dateLast);
+    public void setDateLast(LocalDate dateLast) {
+        this.dateLast = dateLast;
     }
 
 

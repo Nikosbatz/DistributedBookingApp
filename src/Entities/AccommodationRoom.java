@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.time.LocalDate;
+
 
 public class AccommodationRoom implements Serializable {
 
@@ -19,7 +21,8 @@ public class AccommodationRoom implements Serializable {
     private String imagePath;
     private int owner;
 
-    private HashMap<String,String> availiableDates = new HashMap<String,String>();
+    private HashMap<LocalDate,LocalDate> availableDates = new HashMap<LocalDate,LocalDate>();
+    private HashMap<LocalDate,LocalDate> bookedDates = new HashMap<LocalDate,LocalDate>();
 
     // Create a new instance using a JSONObject object.
     public AccommodationRoom(JSONObject json){
@@ -39,6 +42,12 @@ public class AccommodationRoom implements Serializable {
         sum += review;
         setNoOfReviews(getNoOfReviews()+1);
         setStars(sum/getNoOfReviews());
+    }
+
+
+    public String toString(){
+        return ("\nName: " + getName() +"\nArea: " + getArea() + "\nCapacity: " + getCapacity() +
+                "\nStars: " + getStars() + "\nPrice: " + getPrice());
     }
 
     // Just Getters and Setters below
@@ -100,29 +109,32 @@ public class AccommodationRoom implements Serializable {
         this.owner = owner;
     }
 
-
-
-    public ArrayList<String> getDatesFirst(){           //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        ArrayList<String> datesFirst = new ArrayList<>();
-        for (String date: availiableDates.keySet()){
-            datesFirst.add(date);
-
-        }
-        return datesFirst;
+    public HashMap<LocalDate, LocalDate> getAvailableDates() {       //!!!!!!!!!!
+        return availableDates;
     }
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-mm-yyyy");
-    private Date availDateFirst;
-    private Date availDateLast;
-    public boolean isAvailiable(Date dateFirst, Date dateLast) throws ParseException {            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //return true;
-        for (String date: availiableDates.keySet()){
-            availDateFirst = simpleDateFormat.parse(date);
-            availDateLast = simpleDateFormat.parse(availiableDates.get(date));
+    //TODO setAvailableDates()
 
-            return ( (dateFirst.after(availDateFirst) || dateFirst.compareTo(availDateLast) == 0)
-                    && (dateLast.before(availDateLast) || dateLast.compareTo(availDateLast) == 0)
-            );
+    public HashMap<LocalDate, LocalDate> getBookedDates() {
+        return bookedDates;
+    }
+
+
+
+
+
+    public boolean isAvailable(LocalDate dateFirst, LocalDate dateLast) {
+        LocalDate availDateFirst;
+        LocalDate availDateLast;
+        for (LocalDate date: availableDates.keySet()){
+            availDateFirst = date;
+            availDateLast = availableDates.get(date);
+
+            if ( (dateFirst.isAfter(availDateFirst) || dateFirst.isEqual(availDateLast))
+                    && (dateLast.isBefore(availDateLast) || dateLast.isEqual(availDateLast))
+            ) {
+                return true;
+            }
         }
 
         return false;

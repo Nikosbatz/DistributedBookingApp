@@ -74,7 +74,7 @@ public class ManagerApp {
 
                         ArrayList<AccommodationRoom> result = (ArrayList<AccommodationRoom>) objectIn.readObject();
                         for (AccommodationRoom room : result) {
-                            System.out.println(room.getName());
+                            System.out.println(room.toString());
                         }
                         break;
 

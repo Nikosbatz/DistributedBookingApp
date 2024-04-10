@@ -1,6 +1,7 @@
+/*
 package Server;
 
-import Entities.MessageData;
+
 import Entities.Task;
 import Worker.*;
 import java.io.*;
@@ -262,7 +263,8 @@ public class MasterThread implements Runnable{
             task.setAreaFilter((String)objectIn.readObject());
 
 
-            /*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
+            */
+/*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
             objectOut.writeObject(null);
             objectOut.flush();
             //task.setAreaFilter((String)objectIn.readObject());
@@ -271,7 +273,8 @@ public class MasterThread implements Runnable{
             objectOut.writeObject("Enter the last date (if you don't have a preference, type 'null'): ");
             objectOut.writeObject(null);
             objectOut.flush();
-            task.setAreaFilter((String)objectIn.readObject());*/
+            task.setAreaFilter((String)objectIn.readObject());*//*
+
 
             //LocalDate dateEnd = LocalDate.parse(tempDate);
 
@@ -300,3 +303,4 @@ public class MasterThread implements Runnable{
         }
     }
 }
+*/

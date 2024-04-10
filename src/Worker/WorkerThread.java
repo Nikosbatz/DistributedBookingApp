@@ -4,6 +4,7 @@ import Entities.*;
 
 import java.io.*;
 import java.net.*;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -96,8 +97,16 @@ public class WorkerThread implements Runnable{
                         break;
 
                     case "book":
-                        //TODO
-                        //TODO synchronization
+
+                        for(int managerId: roomsMap.keySet()){
+                            ArrayList<AccommodationRoom> rooms = roomsMap.get(managerId);
+                            for (AccommodationRoom room: rooms) {
+                                // If room is stored in this Worker
+                                if (room.getName().equals(task.getRoomName())) {
+                                    WorkerFunctions.bookAroom(task, room);
+                                }
+                            }
+                        }
                         break;
 
                     default:
@@ -106,7 +115,7 @@ public class WorkerThread implements Runnable{
             }
 
 
-        }catch (IOException | ClassNotFoundException e){
+        }catch (IOException | ClassNotFoundException | ParseException e){
             e.printStackTrace();
         }
 
