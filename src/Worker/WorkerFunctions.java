@@ -18,7 +18,12 @@ public class WorkerFunctions {
             roomsMap.put(task.getManagerID(), new ArrayList<>());
         }
 
-        roomsMap.get(task.getManagerID()).add(new AccommodationRoom(task.getJson()));
+        AccommodationRoom room = new AccommodationRoom(task.getJson());
+        ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
+        list.add(room);
+
+        System.out.println("list size: " + list.size());
+
     }
 
 
@@ -46,6 +51,7 @@ public class WorkerFunctions {
 
 
     public static ArrayList<AccommodationRoom> showManagerRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+        System.out.println("list to return size: " + roomsMap.get(task.getManagerID()).size());
         return roomsMap.get(task.getManagerID());
     }
 

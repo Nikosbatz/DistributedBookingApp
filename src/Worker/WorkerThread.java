@@ -31,8 +31,9 @@ public class WorkerThread implements Runnable{
             // Reads the task from Master
             Task task = (Task) objectIn.readObject();
 
-            // Connects With Reducer
-            Socket Reducer = WorkerFunctions.connectWithReducer();
+
+
+            System.out.println("method: " + task.getMethod());
 
             // If the task is sent from manager interface
             if (task.getIsManager()){
@@ -42,13 +43,15 @@ public class WorkerThread implements Runnable{
                         if (task.getWorkerID() == this.WorkerID) {
                             WorkerFunctions.insert(task, roomsMap);
 
+
                         }
 
                         break;
 
                     case "show":
+                        // Connects With Reducer
+                        Socket Reducer = WorkerFunctions.connectWithReducer();
                         ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
-                        System.out.println(rooms.size() + "asdasda");
                         WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
                         break;
 
@@ -61,6 +64,8 @@ public class WorkerThread implements Runnable{
                 switch (task.getMethod()) {
                     case "filter":
                         try {
+                            // Connects With Reducer
+                            Socket Reducer = WorkerFunctions.connectWithReducer();
                             ArrayList<AccommodationRoom> filteredRooms = WorkerFunctions.filterRooms(task, roomsMap);
                             WorkerFunctions.sendResultToReducer(Reducer, (int) task.getTaskID(), filteredRooms);
                             break;

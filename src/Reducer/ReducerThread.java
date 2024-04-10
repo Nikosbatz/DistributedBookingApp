@@ -12,11 +12,13 @@ public class ReducerThread implements Runnable{
 
     Socket client ;
     HashMap<Integer, ArrayList<AccommodationRoom>> results;
+    HashMap<Integer, Integer> taskRepliesCount;
     int WorkersNum;
 
-    public ReducerThread(Socket client, HashMap<Integer, ArrayList<AccommodationRoom>> results ){
+    public ReducerThread(Socket client, HashMap<Integer, ArrayList<AccommodationRoom>> results, HashMap<Integer, Integer> taskRepliesCount ){
         this.client = client;
         this.results = results;
+        this.taskRepliesCount = taskRepliesCount;
     }
 
 
@@ -32,6 +34,21 @@ public class ReducerThread implements Runnable{
 
             // Get the result of an operation from a Worker
             HashMap<Integer, ArrayList<AccommodationRoom>> result = (HashMap<Integer, ArrayList<AccommodationRoom>>) objectIn.readObject();
+
+
+            synchronized (taskRepliesCount){
+                for (Integer taskID: result.keySet()){
+                    if (taskRepliesCount.get(taskID) == null){
+                        taskRepliesCount.put(taskID, 1);
+                    }
+                    else {
+                        int i = taskRepliesCount.get(taskID) + 1;
+                        taskRepliesCount.put(taskID, i);
+                    }
+                }
+            }
+
+
 
             System.out.println(result.size());
             synchronized (results) {
@@ -49,8 +66,6 @@ public class ReducerThread implements Runnable{
                     }
                 }
             }
-
-            System.out.println(results.get(1).getLast().getName());
 
 
         }

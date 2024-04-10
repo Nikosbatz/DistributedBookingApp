@@ -29,64 +29,71 @@ public class ManagerApp {
 
             // Declaring to Master to use the manager interface
             objectOut.writeObject("manager");
+            while (true) {
+                System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
+                System.out.print("Enter your choice: ");
+                String response = scannerIn.nextLine();
 
-            System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
-            String response = scannerIn.nextLine();
+                // Instantiating new Task object
+                Task task = new Task();
 
-            // Instantiating new Task object
-            Task task = new Task();
+                String masterResponse;
 
-            String masterResponse;
+                switch (response) {
 
-            switch (response) {
+                    // Insert Room
+                    case "1":
 
-                // Insert Room
-                case "1":
+                        // Create JSON object from local file
+                        JSONObject json = insertJSONFile(scannerIn);
 
-                    // Create JSON object from local file
-                    JSONObject json = insertJSONFile(scannerIn);
+                        // Set task Attributes
+                        task.setManagerID(1);
+                        task.setMethod("insert");
+                        task.setJson(json);
 
-                    // Set task Attributes
-                    task.setManagerID(1);
-                    task.setMethod("insert");
-                    task.setJson(json);
+                        // Send Task to Master
+                        objectOut.writeObject(task);
 
-                    // Send Task to Master
-                    objectOut.writeObject(task);
+                        // Waiting for Master response
+                        System.out.println("Waiting for Server...\n");
+                        break;
 
-                    // Waiting for Master response
-                    System.out.println("Waiting for Server...");
-                    masterResponse = (String)objectIn.readObject();
-                    break;
+                    // Show Current manager's rooms
+                    case "2":
 
-                // Show Current manager's rooms
-                case "2":
+                        // Set task Attributes
+                        task.setManagerID(1);
+                        task.setMethod("show");
 
-                    // Set task Attributes
-                    task.setManagerID(1);
-                    task.setMethod("show");
+                        // Send Task to Master
+                        objectOut.writeObject(task);
 
-                    // Waiting for Master response
-                    System.out.println("Waiting for Server...");
-                    masterResponse = (String)objectIn.readObject();
-                    break;
+                        // Waiting for Master response
+                        System.out.println("Waiting for Server...");
 
-                // Exit the manager interface
-                case "3":
+                        ArrayList<AccommodationRoom> result = (ArrayList<AccommodationRoom>) objectIn.readObject();
+                        for (AccommodationRoom room : result) {
+                            System.out.println(room.getName());
+                        }
+                        break;
 
-                    objectOut.writeObject("Exiting manager interface...");
-                    objectOut.writeObject(null);
-                    objectOut.flush();
-                    break;
+                    // Exit the manager interface
+                    case "3":
 
-                // Default option
-                default:
-                    objectOut.writeObject("Invalid option selected. Please try again.");
-                    objectOut.writeObject(null);
-                    objectOut.flush();
-                    break;
+                        objectOut.writeObject("Exiting manager interface...");
+                        objectOut.writeObject(null);
+                        objectOut.flush();
+                        break;
+
+                    // Default option
+                    default:
+                        objectOut.writeObject("Invalid option selected. Please try again.");
+                        objectOut.writeObject(null);
+                        objectOut.flush();
+                        break;
+                }
             }
-
 
 
 

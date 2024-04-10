@@ -53,7 +53,6 @@ public class RenterApp {
                     System.out.println("Waiting for Server...");
                     masterResponse = (String)objectIn.readObject();
 
-
                 }
                 case "2" -> {
                     //TODO
@@ -78,8 +77,6 @@ public class RenterApp {
                     // Waiting for Master response
                     System.out.println("Waiting for Server...");
                     masterResponse = (String)objectIn.readObject();
-
-
 
                 }
             }

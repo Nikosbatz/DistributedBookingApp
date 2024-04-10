@@ -6,6 +6,7 @@ import Entities.Task;
 import Worker.*;
 import java.io.*;
 import java.net.*;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -50,7 +51,7 @@ public class MasterThread2 implements Runnable{
             }
             else if (line.equals("reducer")){
                 // REDUCER interface method call
-                //TODO
+                runReducerInterface(objectOut, objectIn);
             }
         }
 
@@ -61,137 +62,120 @@ public class MasterThread2 implements Runnable{
     }
 
 
+
+    // INTERFACE TYPES IMPLEMENTATIONS BELOW ( MANAGER, RENTER, REDUCER ) =========================
     public void runManagerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
+        while (true){
+            try {
+                // Receive Task from Client
+                Task task = (Task) objectIn.readObject();
+                task.setIsManager(true);
 
-        try {
+                // Add task to the queue of pending tasks
+                taskMap.put((int) task.getTaskID(), task);
 
-            // Receive Task from Client
-            Task task = (Task)objectIn.readObject();
+                // If method of Task is "insert"
+                if (task.getMethod().equals("insert")) {
 
-            task.setIsManager(true);
-            // Add task to the queue of pending tasks
-            taskMap.put((int)task.getTaskID(), task);
+                    // Choosing Worker Node based on hashCode
+                    long hashCode = (long) task.getJson().get("roomName").hashCode();
+                    int WorkerId = (int) hashCode % workersList.size();
+                    task.setWorkerID(WorkerId);
 
-            // If method of Task is "insert"
-            if ( task.getMethod().equals("insert")) {
 
-                // Choosing Worker Node based on hashCode
-                long hashCode = (long) task.getJson().get("roomName").hashCode();
-                int WorkerId = (int) hashCode % workersList.size();
-                task.setWorkerID(WorkerId);
-                for (Worker w : workersList){
-                    if (w.getId() == task.getWorkerID()){
-                        // Send insert Task to specific Worker based on Hashing
-                       Socket socket = new Socket("localhost", w.getPort());
-                       ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                       out.writeObject(task);
-                       out.close();
+                    for (Worker w : workersList) {
+                        if (w.getId() == task.getWorkerID()) {
+                            // Send insert Task to specific Worker based on Hashing
+                            Socket socket = new Socket("localhost", w.getPort());
+                            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                            out.writeObject(task);
+                            out.close();
+                        }
                     }
+                } else {
+
+                    System.out.println(task.getMethod());
+
+                    // sockets connecting Master with Workers
+                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+                    // Send task to all the workers that Master is connected to
+                    sendTaskToWorkers(task, sockets);
+
+                    // Wait for the Task to complete
+                    ArrayList<AccommodationRoom> result = waitForResult(task);
+
+                    // Return result back to user
+                    objectOut.writeObject(result);
                 }
+
+
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
             }
-            else {
-
-                // sockets connecting Master with Workers
-                HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
-
-                // Send task to all the workers that Master is connected to
-                sendTaskToWorkers(task, sockets);
-            }
-
-            ArrayList<AccommodationRoom> results;
-            while(true) {
-                synchronized (completedTasks) {
-
-                    // Wait for a new entry on the completedTasks HashMap
-                    completedTasks.wait();
-
-                    // If there is a key == taskID then break loop
-                    if (completedTasks.get((int) task.getTaskID()) != null) {
-                        results = completedTasks.get((int) task.getTaskID());
-                        completedTasks.remove((int)task.getTaskID());
-                        break;
-                    }
-                }
-            }
-            objectOut.writeObject(results);
-
-        }
-        catch (IOException | ClassNotFoundException | InterruptedException e){
-            e.printStackTrace();
         }
     }
 
 
     public void runRenterInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
         try {
-            Boolean isManager = false;
-            objectOut.writeObject("Welcome to renter interface...");
-            objectOut.writeObject("Choose one of the following options.");
-            objectOut.writeObject("1. Filter the rooms. \n2. Make a reservation \n3. Rate a room");
-            objectOut.writeObject(null);
-            objectOut.flush();
 
-            // Instantiate new Task object with unique ID
-            Task task = new Task();
+            // Receive Task from Client
+            Task task = (Task)objectIn.readObject();
+            task.setIsManager(false);
+
+            // Add task to the queue of pending tasks
+            taskMap.put((int)task.getTaskID(), task);
 
             // Establishes connection with Workers
             HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
-            String response =(String) objectIn.readObject();
-            switch (response) {
-                case "1" -> {
+            // Send task to all the workers that Master is connected to
+            sendTaskToWorkers(task, sockets);
 
-                    // The method that Master will request from Workers
-                    String methodRequest = "filter";
-                    task.setMethod(methodRequest);
+            // Wait for the Task to complete
+            ArrayList<AccommodationRoom> result = waitForResult(task);
 
-                    // Asking client to insert filters
-                    objectOut.writeObject("Choose filters : ");
-                    insertFilters(task, objectOut, objectIn);
+            // Return result back to user
+            objectOut.writeObject(result);
 
-
-                    // Sends the Task to every worker Master is aware of
-                    sendTaskToWorkers(task, sockets);
-
-
-                }
-                case "2" -> {
-                    //TODO
-                }
-                case "3" -> {
-                    // Asking user to input the name of the room he wishes to review
-                    objectOut.writeObject("Enter your review (0-5)");
-                    objectOut.writeObject(null);
-                    objectOut.flush();
-
-                    // Reading user's input and setting the filter
-                    task.setRoomName((String)objectIn.readObject());
-
-                    // Asking user to input his review of the room
-                    objectOut.writeObject("Enter your review (0-5)");
-                    objectOut.writeObject(null);
-                    objectOut.flush();
-
-                    // method
-                    task.setMethod("rate");
-
-                    // Reading user's input and setting the filter
-                    task.setStarsFilter((int)objectIn.readObject());
-
-                    // Send
-                    sendTaskToWorkers(task, sockets);
-
-
-                    objectOut.writeObject("We are uploading your review...");
-
-
-                }
-            }
         }
         catch (IOException| ClassNotFoundException e){
             e.printStackTrace();
         }
     }
+
+    public void runReducerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn) {
+
+        try {
+            System.out.println("MPIKE REDUCER INTERFACE");
+            // Read taskID and result of the completed Task from reducer
+            int taskID = (int) objectIn.readObject();
+            ArrayList<AccommodationRoom> result = (ArrayList<AccommodationRoom>) objectIn.readObject();
+
+            // Insert {taskID, result} to completedTasks and notifyAll threads waiting for new insertions
+            synchronized (completedTasks){
+                completedTasks.put(taskID, result);
+                completedTasks.notifyAll();
+            }
+
+
+        }
+        catch (IOException | ClassNotFoundException e){
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    // HELPER METHODS BELOW ============================
 
 
     // Establish connection with each Worker that Master has.
@@ -231,51 +215,31 @@ public class MasterThread2 implements Runnable{
             }
         }
     }
-    public void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
+
+    public ArrayList<AccommodationRoom> waitForResult(Task task){
 
         try {
+            while (true) {
 
-            objectOut.writeObject("Enter the location (if you don't have a preference, type 'null'): ");
-            objectOut.writeObject(null);
-            objectOut.flush();
-            task.setAreaFilter((String)objectIn.readObject());
+                // Wait for a new insertion on the completedTasks HashMap
 
 
-            /*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
-            objectOut.writeObject(null);
-            objectOut.flush();
-            //task.setAreaFilter((String)objectIn.readObject());
+                synchronized (completedTasks) {
 
-            //LocalDate dateStart = LocalDate.parse(tempDate);
-            objectOut.writeObject("Enter the last date (if you don't have a preference, type 'null'): ");
-            objectOut.writeObject(null);
-            objectOut.flush();
-            task.setAreaFilter((String)objectIn.readObject());*/
-
-            //LocalDate dateEnd = LocalDate.parse(tempDate);
-
-            objectOut.writeObject("Enter the number of people (if you don't have a preference, type 'null'): ");
-            objectOut.writeObject(null);
-            objectOut.flush();
-            task.setCapacityFilter( Integer.parseInt((String)objectIn.readObject()));
-
-            objectOut.writeObject("Enter the price (if you don't have a preference, type 'null'): ");
-            objectOut.writeObject(null);
-            objectOut.flush();
-            task.setPriceFilter( Integer.parseInt((String)objectIn.readObject()));
-
-            objectOut.writeObject("Enter the number of rating stars of the room (if you don't have a preference, type 'null'): ");
-            objectOut.writeObject(null);
-            objectOut.flush();
-            task.setStarsFilter( Integer.parseInt((String)objectIn.readObject()));
-
-            objectOut.writeObject("Filtering...");
-            objectOut.flush();
-
-
+                    // If there is a key == taskID then return this {key, value} pair
+                    if (completedTasks.get((int) task.getTaskID()) != null) {
+                        ArrayList<AccommodationRoom> result = completedTasks.get((int) task.getTaskID());
+                        completedTasks.remove((int) task.getTaskID());
+                        return result;
+                    }
+                }
+            }
         }
-        catch (IOException| ClassNotFoundException e){
-            e.printStackTrace();
-        }
+        finally {}
+
+
+
     }
+
+
 }
