@@ -1,27 +1,25 @@
+/*
 package Server;
 
-import Entities.MessageData;
+
 import Entities.Task;
 import Worker.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
-
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 
 public class MasterThread implements Runnable{
     private Socket client;
-    private  final ArrayList<Worker> workerslist;
+    private  final ArrayList<Worker> workersList;
+    private HashMap<Integer, Task> taskMap;
 
 
-    MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer, Task> taskMap){
+    public MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer, Task> taskMap){
         this.client = client;
-        this.workerslist = workersList;
+        this.workersList = workersList;
+        this.taskMap = taskMap;
     }
 
     @Override
@@ -32,26 +30,26 @@ public class MasterThread implements Runnable{
             ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
 
 
-            objectOut.writeObject("Hello are you a renter or a manager?");
-            objectOut.writeObject("press (a) for manager OR (b) for renter");
-            objectOut.flush();
-
-            // read client response
+            // read client category
             String line = (String)objectIn.readObject();
 
-            while (line != null){
-                if (line.equals("a")){
-                    // Manager interface method call
-                    runManagerInterface(objectOut, objectIn);
-                    break;
-                }
-                else{
-                    // renter interface method call
-                    runRenterInterface(objectOut, objectIn);
-                    break;
-                }
+
+            if (line.equals("manager")){
+                // MANAGER interface method call
+                runManagerInterface(objectOut, objectIn);
+
+            }
+            else if (line.equals("renter")){
+                // RENTER interface method call
+                runRenterInterface(objectOut, objectIn);
+
+            }
+            else if (line.equals("reducer")){
+                // REDUCER interface method call
+                //TODO
             }
         }
+
         catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
         }
@@ -65,10 +63,16 @@ public class MasterThread implements Runnable{
             Boolean isManager = true;
             // Prints initial messages to client
             objectOut.writeObject("Welcome to Manager interface...");
-            objectOut.writeObject("Welcome to manager interface. Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
+            objectOut.writeObject("Choose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
             objectOut.writeObject(null);
             objectOut.flush();
 
+            // Instantiate new Task object with unique taskID
+            Task task = new Task();
+            task.setIsManager(true);
+
+            // sockets connecting Master with Workers
+            HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
             // Read the operation that client wants the server to do.
             String response = (String) objectIn.readObject();
@@ -79,25 +83,43 @@ public class MasterThread implements Runnable{
                 // Insert Room
                 case "1":
                     objectOut.writeObject("Please insert the JSON for the new room:");
-                    objectOut.writeObject(null);
                     objectOut.flush();
 
                     // Reads JSON data from the client.
                     MessageData message = (MessageData) objectIn.readObject();
 
-                    // Instantiate new Task object with unique taskID
-                    Task task = new Task();
+
+
+                    // Choosing Worker Node based on hashCode
+                    long hashCode = (long) message.json.get("roomName").hashCode();
+                    int nodeId =(int) hashCode % workersList.size();
+
+                    // Set task Attributes
+                    task.setManagerID(1);
                     task.setMethod("insert");
                     task.setJson(message.json);
-                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+                    task.setWorkerID(nodeId);
+
+                    // Add task to the queue of pending tasks
+                    taskMap.put((int)task.getTaskID(), task);
+
+                    // Send task to all the workers that Master is connected to
                     sendTaskToWorkers(task, sockets);
 
+                    objectOut.writeObject("Waiting for room to be inserted...");
+                    objectOut.flush();
                     break;
 
                 // Show Current manager's rooms
                 case "2":
-                    // Show all listings
 
+                    int managerID = 1;
+                    // Instantiate new Task object with unique taskID
+                    task.setManagerID(managerID);
+                    task.setMethod("show");
+
+                    // Send task to all the workers that Master is connected to
+                    sendTaskToWorkers(task, sockets);
                     break;
 
                 // Exit the manager interface
@@ -119,14 +141,6 @@ public class MasterThread implements Runnable{
         catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
         }
-
-
-
-        // Establishes connection with Workers
-        HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
-
-
-
     }
 
 
@@ -139,13 +153,15 @@ public class MasterThread implements Runnable{
             objectOut.writeObject(null);
             objectOut.flush();
 
+            // Instantiate new Task object with unique ID
+            Task task = new Task();
+
+            // Establishes connection with Workers
+            HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
             String response =(String) objectIn.readObject();
             switch (response) {
                 case "1" -> {
-
-                    // Instantiate new Task object with unique ID
-                    Task task = new Task();
 
                     // The method that Master will request from Workers
                     String methodRequest = "filter";
@@ -155,8 +171,6 @@ public class MasterThread implements Runnable{
                     objectOut.writeObject("Choose filters : ");
                     insertFilters(task, objectOut, objectIn);
 
-                    // Establishes connection with Workers
-                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
                     // Sends the Task to every worker Master is aware of
                     sendTaskToWorkers(task, sockets);
@@ -167,17 +181,39 @@ public class MasterThread implements Runnable{
                     //TODO
                 }
                 case "3" -> {
-                    //TODO
+                    // Asking user to input the name of the room he wishes to review
+                    objectOut.writeObject("Enter your review (0-5)");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+
+                    // Reading user's input and setting the filter
+                    task.setRoomName((String)objectIn.readObject());
+
+                    // Asking user to input his review of the room
+                    objectOut.writeObject("Enter your review (0-5)");
+                    objectOut.writeObject(null);
+                    objectOut.flush();
+
+                    // method
+                    task.setMethod("rate");
+
+                    // Reading user's input and setting the filter
+                    task.setStarsFilter((int)objectIn.readObject());
+
+                    // Send
+                    sendTaskToWorkers(task, sockets);
+
+
+                    objectOut.writeObject("We are uploading your review...");
+
+
                 }
             }
-
         }
         catch (IOException| ClassNotFoundException e){
             e.printStackTrace();
         }
     }
-
-
 
 
     // Establish connection with each Worker that Master has.
@@ -187,7 +223,7 @@ public class MasterThread implements Runnable{
         HashMap<Socket, ObjectOutputStream> sockets = new HashMap<>();
         Socket socket;
         try {
-            for (Worker w : workerslist) {
+            for (Worker w : workersList) {
 
                 // Establish a new connection with each of the Workers
                 socket = new Socket("localhost", w.getPort());
@@ -203,7 +239,10 @@ public class MasterThread implements Runnable{
 
 
     public void sendTaskToWorkers(Task task,HashMap<Socket, ObjectOutputStream> sockets){
+        // add task to the queue of pending tasks
+        this.taskMap.put((int)task.getTaskID(), task);
 
+        // Send task to each Worker
         for (Socket socket : sockets.keySet()) {
             try {
                 // Sends to the worker the method that client requests
@@ -214,7 +253,7 @@ public class MasterThread implements Runnable{
             }
         }
     }
-    public static void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
+    public void insertFilters(Task task, ObjectOutputStream objectOut, ObjectInputStream objectIn){
 
         try {
 
@@ -224,7 +263,8 @@ public class MasterThread implements Runnable{
             task.setAreaFilter((String)objectIn.readObject());
 
 
-            /*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
+            */
+/*objectOut.writeObject("Enter the first date (if you don't have a preference, type 'null'): ");
             objectOut.writeObject(null);
             objectOut.flush();
             //task.setAreaFilter((String)objectIn.readObject());
@@ -233,7 +273,8 @@ public class MasterThread implements Runnable{
             objectOut.writeObject("Enter the last date (if you don't have a preference, type 'null'): ");
             objectOut.writeObject(null);
             objectOut.flush();
-            task.setAreaFilter((String)objectIn.readObject());*/
+            task.setAreaFilter((String)objectIn.readObject());*//*
+
 
             //LocalDate dateEnd = LocalDate.parse(tempDate);
 
@@ -262,3 +303,4 @@ public class MasterThread implements Runnable{
         }
     }
 }
+*/

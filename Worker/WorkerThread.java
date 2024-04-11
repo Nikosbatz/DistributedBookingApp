@@ -1,51 +1,127 @@
 package Worker;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+import Entities.*;
+
+import java.io.*;
+import java.net.*;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import Entities.Task;
-import Entities.AccommodationRoom;
-import org.json.simple.parser.ParseException;
-import java.util.Scanner;
 
 
 public class WorkerThread implements Runnable{
 
     Socket client;
-    HashMap<Integer,AccommodationRoom> roomsMap;
-
-    public WorkerThread(Socket client, HashMap<Integer,AccommodationRoom> roomsList ){
-        this.roomsMap = roomsList;
+    int WorkerID;
+    public HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
+    public WorkerThread(int WorkerID, Socket client, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap ){
+        this.WorkerID = WorkerID;
+        this.roomsMap = roomsMap;
         this.client = client;
     }
 
-    @Override
-    public void run() {
-        try {
-            System.out.println("WorkerThread Started!!!");
-            ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
+    public void run(){
 
-            // Expecting Task object
+        try{
+            System.out.println("WorkerThread Started!!!");
+
+            // Instantiating object streams.
+            ObjectInputStream objectIn = new ObjectInputStream(client.getInputStream());
+            ObjectOutputStream objectOut = new ObjectOutputStream(client.getOutputStream());
+
+            // Reads the task from Master
             Task task = (Task) objectIn.readObject();
 
-            // Determine action based on the task details
-            switch (task.getMethod()) {
-                case "insert":
 
-                    System.out.println("Attempting to insert object");
-                    // Assuming insert function can handle task directly or modify to pass relevant fields
-                    WorkerFunctions.insert();
-                    break;
-                case "filter":
-                    // Handle filtering logic here
-                    break;
-                // Add cases for other methods as necessary
+
+            System.out.println("method: " + task.getMethod());
+
+            // If the task is sent from manager interface
+            if (task.getIsManager()){
+
+                switch (task.getMethod()){
+                    case "insert":
+                        if (task.getWorkerID() == this.WorkerID) {
+                            WorkerFunctions.insert(task, roomsMap);
+
+
+                        }
+
+                        break;
+                    case "show":
+                        // Connects With Reducer
+                        Socket Reducer = WorkerFunctions.connectWithReducer();
+                        ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
+                        WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
+                        break;
+
+                    default:
+                        break;
+                }
             }
-        } catch (IOException | ClassNotFoundException | ParseException e) {
+            // If the task is sent from renter interface
+            else {
+                switch (task.getMethod()) {
+                    case "filter":
+                        try {
+                            // Connects With Reducer
+                            Socket Reducer = WorkerFunctions.connectWithReducer();
+                            ArrayList<AccommodationRoom> filteredRooms = WorkerFunctions.filterRooms(task, roomsMap);
+                            WorkerFunctions.sendResultToReducer(Reducer, (int) task.getTaskID(), filteredRooms);
+                            break;
+                        }
+                        catch (java.text.ParseException e){
+                            e.printStackTrace();
+                        }
+                    case "showAllRooms":
+                        Socket Reducer = WorkerFunctions.connectWithReducer();
+                        ArrayList<AccommodationRoom> roomsAll = WorkerFunctions.showAllRooms( roomsMap);
+                        WorkerFunctions.sendResultToReducer(Reducer,(int) task.getTaskID(),roomsAll);
+                        break;
+                    case "rate":
+
+                        // Check if the room about to be reviewed belongs to this Worker's storage
+                        for(int managerId: roomsMap.keySet()){
+                            ArrayList<AccommodationRoom> rooms = roomsMap.get(managerId);
+                            for (AccommodationRoom room: rooms){
+                                // If room is stored in this Worker
+                                if (room.getName().equals(task.getRoomName())){
+                                    // This block is synchronized
+                                    synchronized (this) {
+                                        System.out.println("Before adding" + room.getStars());
+                                        // add the review to the room
+                                        room.addReview(task.getStarsFilter());
+                                        System.out.println("After adding" + room.getStars());
+                                    }
+                                }
+
+                            }
+                        }
+                        break;
+
+                    case "book":
+                        /* Iterates through all the values (ArrayList) of every key (managerID)
+                           to check if the room with name = task.getRoomName() is in this Worker   */
+                        for(int managerId: roomsMap.keySet()){
+                            ArrayList<AccommodationRoom> rooms = roomsMap.get(managerId);
+                            for (AccommodationRoom room: rooms) {
+                                // If room is stored in this Worker
+                                if (room.getName().equals(task.getRoomName())) {
+                                    WorkerFunctions.bookAroom(task, room);
+                                }
+                            }
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+
+        }catch (IOException | ClassNotFoundException | ParseException e){
             e.printStackTrace();
         }
-    }
 
+    }
 }

@@ -1,8 +1,8 @@
 package Entities;
 
-import java.io.Serializable;
-
 import org.json.simple.JSONObject;
+
+import java.io.Serializable;
 
 public class MessageData implements Serializable {
     public String data ;
@@ -12,6 +12,7 @@ public class MessageData implements Serializable {
 
         this.data = data;
     }
+
 
     public MessageData(){
         this.data = "";

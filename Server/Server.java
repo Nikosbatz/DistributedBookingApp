@@ -1,5 +1,6 @@
 package Server;
 
+import Entities.AccommodationRoom;
 import Entities.Task;
 import Worker.*;
 import java.io.*;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 public class Server {
     public static ArrayList<Worker> workersList = new ArrayList<Worker>();
     public static HashMap<Integer, Task> taskMap = new HashMap<>();
+    public static HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks = new HashMap<>();
 
     public static void main(String[] args){
 
@@ -23,17 +25,16 @@ public class Server {
             // Initialize Server Socket and Server Port
             server = new ServerSocket(1234);
 
-            // Get server port
-            System.out.println(server.getLocalPort());
+
             System.out.println("Waiting for requests...");
             while (true) {
 
                 // Client connection accept
                 Socket client = server.accept();
-                System.out.println("New client connected" + client.getInetAddress().getHostAddress());
+                System.out.println("New client connected!");
 
                 // New Master Thread for the client
-                new Thread(new MasterThread(client, workersList, taskMap)).start();
+                new Thread(new MasterThread2(client, workersList, taskMap, completedTasks)).start();
             }
 
         }

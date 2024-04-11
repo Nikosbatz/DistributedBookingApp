@@ -2,12 +2,11 @@ package  Worker;
 
 
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.HashMap;
-
 import Entities.AccommodationRoom;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 
 
@@ -15,15 +14,16 @@ public class Worker {
 
     private static int nextWorkerPort = 1111;
     final private int port ;
-    private static int nextWorkerId = 1;
+    private static int nextWorkerId = 0;
     final private int id;
 
-    public HashMap<Integer,AccommodationRoom> roomsMap = new HashMap();
+    public HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
 
     // Default Constructor
     public Worker(){
         this.port = getNextWorkerPort();
         this.id = getNextWorkerId();
+        roomsMap = new HashMap<>();
         startWorker();
     }
 
@@ -43,7 +43,7 @@ public class Worker {
                     Socket client = workerSocket.accept();
 
                     // Initializing a new thread to handle the MasterThread
-                    new Thread(new WorkerThread(client, roomsMap)).start();
+                    new Thread(new WorkerThread(id, client, roomsMap)).start();
                 }
 
             } catch (IOException e) {

@@ -1,16 +1,21 @@
 package Entities;
 
 import java.io.Serializable;
-import java.security.PublicKey;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import java.time.LocalDate;
+
 
 public class Task implements Serializable {
     public static long nextTaskID = 0;
     private long taskID;
     private String method ;
+    private int WorkerID;
+    private String roomName;
+    private Boolean isManager;
     private int starsFilter ;
     private int priceFilter;
     private int capacityFilter;
@@ -18,15 +23,13 @@ public class Task implements Serializable {
     private int threadId;
     private JSONObject json;
     private int managerID;
-    private String roomName;
+    private LocalDate  dateFirst;
 
-    private int noOfPersons;
-    private String area;
-    private int stars;
-    private int noOfReviews;
-    private String roomImage;
+    private LocalDate  dateLast;
 
 
+
+    // Default constructor setting the unique ID of the task
     public Task(){
         setTaskID();
     }
@@ -97,7 +100,6 @@ public class Task implements Serializable {
 
     public void setTaskID() {
         this.taskID = nextTaskID++;
-
     }
 
     public int getPriceFilter() {
@@ -108,44 +110,45 @@ public class Task implements Serializable {
         this.priceFilter = price;
     }
 
+    public Boolean getIsManager() {
+        return isManager;
+    }
+
+    public void setIsManager(Boolean isManager) {
+        this.isManager = isManager;
+    }
+
+    public int getWorkerID() {
+        return WorkerID;
+    }
+
+    public void setWorkerID(int workerID) {
+        WorkerID = workerID;
+    }
+
     public String getRoomName() {
         return roomName;
     }
+
     public void setRoomName(String roomName) {
         this.roomName = roomName;
     }
-    public int getNoOfPersons(){
-        return noOfPersons;
-    }
-    public void setNoOfPersons(int noOfPersons){
-        this.noOfPersons = noOfPersons;
+
+    public LocalDate getDateFirst() {
+        return dateFirst;
     }
 
-    public String getArea() {
-        return area;
-    }
-    public void setArea(String area) {
-        this.area = area;
+    public void setDateFirst(LocalDate dateFirst) {
+        this.dateFirst = dateFirst;
     }
 
-    public int getStars(){
-        return stars;
-    }
-    public void setStars(int stars){
-        this.stars = stars;
+    public LocalDate getDateLast() {
+        return dateLast;
     }
 
-    public int getNoOfReviews(){
-        return noOfReviews;
-    }
-    public void setNoOfReviews(int noOfReviews){
-        this.noOfReviews = noOfReviews;
+    public void setDateLast(LocalDate dateLast) {
+        this.dateLast = dateLast;
     }
 
-    public String getRoomImage() {
-        return roomImage;
-    }
-    public void setRoomImage(String roomImage) {
-        this.roomImage = roomImage;
-    }
+
 }

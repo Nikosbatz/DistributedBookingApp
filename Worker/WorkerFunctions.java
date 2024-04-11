@@ -1,74 +1,130 @@
 package Worker;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import Entities.Task;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import java.util.Scanner;
-import Entities.MessageData;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import Entities.*;
+
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.time.LocalDate;
+import java.text.ParseException;
+
 
 public class WorkerFunctions {
-    private static String rootJSON = "C:\\Users\\Sotir\\Downloads\\DistributedBookingApp-v-Batz\\DistributedBookingApp-v-Batz\\src\\assets\\room.json";
 
-    public static void insert() throws IOException, ParseException {
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter room name:");
-        String roomName = scanner.nextLine();
+    public synchronized static void insert(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
 
-        System.out.println("Enter number of persons:");
-        int noOfPersons = Integer.parseInt(scanner.nextLine());
+        if (roomsMap.get(task.getManagerID()) == null){
+            roomsMap.put(task.getManagerID(), new ArrayList<>());
+        }
 
-        System.out.println("Enter area:");
-        String area = scanner.nextLine();
+        AccommodationRoom room = new AccommodationRoom(task.getJson());
+        ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
+        list.add(room);
 
-        System.out.println("Enter stars:");
-        int stars = Integer.parseInt(scanner.nextLine());
+        System.out.println("list size: " + list.size());
 
-        System.out.println("Enter number of reviews:");
-        int noOfReviews = Integer.parseInt(scanner.nextLine());
+    }
 
-        System.out.println("Enter room image URL/path:");
-        String roomImage = scanner.nextLine();
 
-        JSONObject newRoom = new JSONObject();
-        newRoom.put("roomName", roomName);
-        newRoom.put("noOfPersons", noOfPersons);
-        newRoom.put("area", area);
-        newRoom.put("stars", stars);
-        newRoom.put("noOfReviews", noOfReviews);
-        newRoom.put("roomImage", roomImage);
 
-        // Load the existing rooms JSON array from the file
-        File file = new File(rootJSON);
-        JSONObject rootObject;
-        JSONArray roomsArray;
-        if (file.length() == 0) {
-            roomsArray = new JSONArray();
-            rootObject = new JSONObject();
-        } else {
-            String content = new String(Files.readAllBytes(Paths.get(rootJSON)));
-            rootObject = (JSONObject) new JSONParser().parse(content);
-            if (rootObject.containsKey("rooms")) {
-                roomsArray = (JSONArray) rootObject.get("rooms");
-            } else {
-                roomsArray = new JSONArray();
+    public static ArrayList<AccommodationRoom> filterRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap) throws java.text.ParseException {
+        ArrayList<AccommodationRoom> filteredRooms = new ArrayList<>();
+        synchronized (roomsMap) {
+            for (ArrayList<AccommodationRoom> rooms : roomsMap.values()) {
+                for (AccommodationRoom room : rooms) {
+                    // This block is synchronized
+                    if ((task.getAreaFilter().equals("null") || room.getArea().equals(task.getAreaFilter())
+                            && (task.getCapacityFilter() == 0 || room.getCapacity() >= task.getCapacityFilter())
+                            && (task.getPriceFilter() == 0 || room.getPrice() <= task.getPriceFilter())
+                            && (task.getStarsFilter() == 0 || room.getStars() >= task.getStarsFilter())
+                            && (task.getDateFirst() == null || task.getDateLast() == null || room.isAvailable(task.getDateFirst(), task.getDateLast()))
+                    )) {
+                        filteredRooms.add(room);
+                    }
+                }
             }
         }
-        roomsArray.add(newRoom);
-        rootObject.put("rooms", roomsArray);
 
-        // Write the updated rooms array back to the file
-        try (FileWriter writer = new FileWriter(rootJSON)) {
-            writer.write(rootObject.toJSONString());
-            System.out.println("Room added successfully.");
-        } catch (Exception e) {
+        return filteredRooms;
+    }
+
+
+    public static ArrayList<AccommodationRoom> showManagerRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+        System.out.println("list to return size: " + roomsMap.get(task.getManagerID()).size());
+        return roomsMap.get(task.getManagerID());
+    }
+
+
+    public static ArrayList<AccommodationRoom> showAllRooms(HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+        ArrayList<AccommodationRoom> allRooms = new ArrayList<>();
+        for (ArrayList<AccommodationRoom> managerRooms : roomsMap.values()) {
+            allRooms.addAll(managerRooms);
+        }
+        return allRooms;
+    }
+
+
+    public static Socket connectWithReducer() {
+        try {
+            return new Socket("localhost", 1235);
+        }
+        catch (IOException e){
             e.printStackTrace();
-            System.out.println("Failed to add room.");
+            return null;
+        }
+
+    }
+
+    public static void sendResultToReducer(Socket Reducer, int taskID, ArrayList<AccommodationRoom> result) {
+        try {
+            ObjectOutputStream objectOut = new ObjectOutputStream(Reducer.getOutputStream());
+            HashMap<Integer, ArrayList<AccommodationRoom>> map = new HashMap<>();
+            map.put(taskID, result);
+            System.out.println("TaskID: " + taskID);
+            objectOut.writeObject(map);
+
+        }
+        catch (IOException e){
+            e.printStackTrace();
         }
     }
+
+
+    public static void bookAroom(Task task, AccommodationRoom room) throws ParseException {
+        LocalDate availDateFirst;
+        LocalDate availDateLast;
+        synchronized (room) {
+            for (LocalDate date : room.getAvailableDates().keySet()) {
+                availDateFirst = date;
+                availDateLast = room.getAvailableDates().get(date);
+
+                if (availDateFirst.isEqual(task.getDateFirst()) && availDateLast.isEqual(task.getDateLast())) {
+                    room.getBookedDates().put(task.getDateFirst(),task.getDateLast());
+                    room.getAvailableDates().remove(availDateFirst);
+                }
+                else if (availDateFirst.isEqual(task.getDateFirst()) && task.getDateLast().isBefore(availDateLast)) {
+                    room.getBookedDates().put(task.getDateFirst(),task.getDateLast());
+                    room.getAvailableDates().remove(availDateFirst);
+                    room.getAvailableDates().put(task.getDateLast().plusDays(1), availDateLast);
+
+                }
+                else if (task.getDateFirst().isAfter(availDateFirst) && availDateLast.isEqual(task.getDateLast())) {
+                    room.getBookedDates().put(task.getDateFirst(),task.getDateLast());
+                    room.getAvailableDates().remove(availDateFirst);
+                    room.getAvailableDates().put(availDateFirst, task.getDateFirst().minusDays(1));
+                }
+                else if (task.getDateFirst().isAfter(availDateFirst) && task.getDateLast().isBefore(availDateLast)) {
+                    room.getBookedDates().put(task.getDateFirst(),task.getDateLast());
+                    room.getAvailableDates().remove(availDateFirst);
+                    room.getAvailableDates().put(availDateFirst, task.getDateFirst().minusDays(1));
+                    room.getAvailableDates().put(task.getDateLast().plusDays(1), availDateLast);
+                }
+            }
+        }
+    }
+
+
 }
