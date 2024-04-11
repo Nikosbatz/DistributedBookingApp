@@ -1,4 +1,4 @@
-package Clients;
+package Client;
 
 import Entities.*;
 import org.json.simple.JSONObject;
@@ -12,24 +12,27 @@ import java.util.*;
 public class ManagerApp {
 
 
-
+    private static ObjectInputStream objectIn;
+    private static ObjectOutputStream objectOut;
+    private static Socket socket;
     public static void main(String[] args){
         try {
-            Socket socket = new Socket("localhost", 1234);
+            socket = new Socket("localhost", 1234);
 
 
             // Reading objects from Server
-            ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream());
+            objectIn = new ObjectInputStream(socket.getInputStream());
 
             // Writing objects to Server
-            ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
+            objectOut = new ObjectOutputStream(socket.getOutputStream());
 
             // Instantiating Client input object
             Scanner scannerIn = new Scanner(System.in);
 
             // Declaring to Master to use the manager interface
             objectOut.writeObject("manager");
-            while (true) {
+            boolean isRunning=true;
+            while (isRunning) {
                 System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
                 System.out.print("Enter your choice: ");
                 String response = scannerIn.nextLine();
@@ -80,10 +83,10 @@ public class ManagerApp {
 
                     // Exit the manager interface
                     case "3":
-
-                        objectOut.writeObject("Exiting manager interface...");
-                        objectOut.writeObject(null);
-                        objectOut.flush();
+                        task.setMethod("exit");
+                        objectOut.writeObject(task);
+                        System.out.println("Exiting manager interface...");
+                        isRunning = false;
                         break;
 
                     // Default option
@@ -101,6 +104,18 @@ public class ManagerApp {
         }
         catch (IOException | ClassNotFoundException |NullPointerException e){
             e.printStackTrace();
+        }finally {
+            closeResources();
+        }
+    }
+
+    private static void closeResources(){
+        try{
+            if(objectOut!= null) objectOut.close();
+            if(objectIn != null) objectIn.close();
+            if(socket!=null) socket.close();
+        }catch (IOException e){
+            System.err.println("Error when closing resources: "+e.getMessage());
         }
     }
 

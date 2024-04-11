@@ -1,10 +1,12 @@
 package Server;
 
 import Entities.AccommodationRoom;
+import Entities.MessageData;
 import Entities.Task;
 import Worker.*;
 import java.io.*;
 import java.net.*;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -63,49 +65,57 @@ public class MasterThread2 implements Runnable{
 
     // INTERFACE TYPES IMPLEMENTATIONS BELOW ( MANAGER, RENTER, REDUCER ) =========================
     public void runManagerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
-        while (true){
+        boolean keepRunning = true;
+        while (keepRunning){
             try {
                 // Receive Task from Client
-                Task task = (Task) objectIn.readObject();
-                task.setIsManager(true);
+                Object inputObject=objectIn.readObject();
+                if(inputObject.equals("exit")){
+                    keepRunning = false;
 
-                // Add task to the queue of pending tasks
-                taskMap.put((int) task.getTaskID(), task);
+                }else{
+                    Task task = (Task) inputObject;
+                    task.setIsManager(true);
 
-                // If method of Task is "insert"
-                if (task.getMethod().equals("insert")) {
+                    // Add task to the queue of pending tasks
+                    taskMap.put((int) task.getTaskID(), task);
 
-                    // Choosing Worker Node based on hashCode
-                    long hashCode = (long) task.getJson().get("roomName").hashCode();
-                    int WorkerId = (int) hashCode % workersList.size();
-                    task.setWorkerID(WorkerId);
+                    // If method of Task is "insert"
+                    if (task.getMethod().equals("insert")) {
+
+                        // Choosing Worker Node based on hashCode
+                        long hashCode = (long) task.getJson().get("roomName").hashCode();
+                        int WorkerId = (int) hashCode % workersList.size();
+                        task.setWorkerID(WorkerId);
 
 
-                    for (Worker w : workersList) {
-                        if (w.getId() == task.getWorkerID()) {
-                            // Send insert Task to specific Worker based on Hashing
-                            Socket socket = new Socket("localhost", w.getPort());
-                            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                            out.writeObject(task);
-                            out.close();
+                        for (Worker w : workersList) {
+                            if (w.getId() == task.getWorkerID()) {
+                                // Send insert Task to specific Worker based on Hashing
+                                Socket socket = new Socket("localhost", w.getPort());
+                                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                                out.writeObject(task);
+                                out.close();
+                            }
                         }
+                    } else {
+
+                        System.out.println(task.getMethod());
+
+                        // sockets connecting Master with Workers
+                        HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+                        // Send task to all the workers that Master is connected to
+                        sendTaskToWorkers(task, sockets);
+
+                        // Wait for the Task to complete
+                        ArrayList<AccommodationRoom> result = waitForResult(task);
+
+                        // Return result back to user
+                        objectOut.writeObject(result);
                     }
-                } else {
-
-                    System.out.println(task.getMethod());
-
-                    // sockets connecting Master with Workers
-                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
-
-                    // Send task to all the workers that Master is connected to
-                    sendTaskToWorkers(task, sockets);
-
-                    // Wait for the Task to complete
-                    ArrayList<AccommodationRoom> result = waitForResult(task);
-
-                    // Return result back to user
-                    objectOut.writeObject(result);
                 }
+
 
 
             } catch (IOException | ClassNotFoundException e) {

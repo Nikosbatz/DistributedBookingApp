@@ -1,4 +1,4 @@
-package Clients;
+package Client;
 
 import Entities.*;
 import org.json.simple.JSONObject;
