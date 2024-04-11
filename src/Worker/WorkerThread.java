@@ -97,7 +97,8 @@ public class WorkerThread implements Runnable{
                         break;
 
                     case "book":
-
+                        /* Iterates through all the values (ArrayList) of every key (managerID)
+                           to check if the room with name = task.getRoomName() is in this Worker   */
                         for(int managerId: roomsMap.keySet()){
                             ArrayList<AccommodationRoom> rooms = roomsMap.get(managerId);
                             for (AccommodationRoom room: rooms) {

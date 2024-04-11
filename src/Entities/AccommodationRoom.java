@@ -2,12 +2,9 @@ package Entities;
 import org.json.simple.*;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 
 public class AccommodationRoom implements Serializable {
@@ -33,6 +30,7 @@ public class AccommodationRoom implements Serializable {
         setNoOfReviews((long)json.get("noOfReviews"));
         setPrice((long) json.get("price"));
         setImagePath((String)json.get("imagePath"));
+        setAvailableDates(json);
     }
 
 
@@ -46,8 +44,14 @@ public class AccommodationRoom implements Serializable {
 
 
     public String toString(){
-        return ("\nName: " + getName() +"\nArea: " + getArea() + "\nCapacity: " + getCapacity() +
-                "\nStars: " + getStars() + "\nPrice: " + getPrice());
+        String str = "\nName: " + getName() +"\nArea: " + getArea() + "\nCapacity: " + getCapacity() +
+                "\nStars: " + getStars() + "\nPrice: " + getPrice() + "\nAvailable Dates: ";
+
+        for (LocalDate date: availableDates.keySet()){
+            str += "\n" + date.toString() + " -> " + availableDates.get(date);
+        }
+
+        return (str);
     }
 
     // Just Getters and Setters below
@@ -113,7 +117,22 @@ public class AccommodationRoom implements Serializable {
         return availableDates;
     }
 
-    //TODO setAvailableDates()
+    private void setAvailableDates(JSONObject json) {
+        JSONArray availableDatesArray = (JSONArray) json.get("availableDates");
+        for (Object date : availableDatesArray) {
+            JSONObject availDate = (JSONObject) date;
+            String dateFirst = (String) availDate.get("dateFirst");
+            String dateLast = (String)  availDate.get("dateLast");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            LocalDate dateStart = LocalDate.parse(dateFirst, formatter);
+            LocalDate dateEnd = LocalDate.parse(dateLast, formatter);
+
+            availableDates.put(dateStart,dateEnd);
+
+
+        }
+    }
 
     public HashMap<LocalDate, LocalDate> getBookedDates() {
         return bookedDates;
@@ -126,6 +145,7 @@ public class AccommodationRoom implements Serializable {
     public boolean isAvailable(LocalDate dateFirst, LocalDate dateLast) {
         LocalDate availDateFirst;
         LocalDate availDateLast;
+
         for (LocalDate date: availableDates.keySet()){
             availDateFirst = date;
             availDateLast = availableDates.get(date);
