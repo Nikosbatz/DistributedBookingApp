@@ -43,7 +43,7 @@ public class WorkerFunctions {
                             && (task.getCapacityFilter() == 0 || room.getCapacity() >= task.getCapacityFilter())
                             && (task.getPriceFilter() == 0 || room.getPrice() <= task.getPriceFilter())
                             && (task.getStarsFilter() == 0 || room.getStars() >= task.getStarsFilter())
-                            && (task.getDateFirst() == null || task.getDateLast() == null || room.isAvailable(task.getDateFirst(), task.getDateLast()))
+                            && (room.isAvailable(task.getDateFirst(), task.getDateLast()))
                     ) {
                         filteredRooms.add(room);
                     }
@@ -59,6 +59,16 @@ public class WorkerFunctions {
         System.out.println("list to return size: " + roomsMap.get(task.getManagerID()).size());
         return roomsMap.get(task.getManagerID());
     }
+
+    public static ArrayList<AccommodationRoom> showAllRooms(HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+        ArrayList<AccommodationRoom> allRooms = new ArrayList<>();
+        for (ArrayList<AccommodationRoom> managerRooms : roomsMap.values()) {
+            allRooms.addAll(managerRooms);
+        }
+        System.out.println(allRooms.size() + "----------");
+        return allRooms;
+    }
+
 
     public static Socket connectWithReducer() {
         try {

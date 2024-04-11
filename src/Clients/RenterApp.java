@@ -118,6 +118,19 @@ public class RenterApp {
                         //masterResponse = (String)objectIn.readObject();
 
                     }
+                    case "4" ->{
+                        task.setMethod("showAllRooms");
+
+                        objectOut.writeObject(task);
+
+                        System.out.println("Waiting for Server...");
+
+                        ArrayList<AccommodationRoom> result = (ArrayList<AccommodationRoom>) objectIn.readObject();
+                        for (AccommodationRoom room : result) {
+                            System.out.println(room.toString());
+                        }
+
+                    }
                 }
             }
 

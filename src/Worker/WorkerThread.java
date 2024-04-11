@@ -32,10 +32,6 @@ public class WorkerThread implements Runnable{
             // Reads the task from Master
             Task task = (Task) objectIn.readObject();
 
-
-
-            System.out.println("method: " + task.getMethod());
-
             // If the task is sent from manager interface
             if (task.getIsManager()){
 
@@ -43,10 +39,7 @@ public class WorkerThread implements Runnable{
                     case "insert":
                         if (task.getWorkerID() == this.WorkerID) {
                             WorkerFunctions.insert(task, roomsMap);
-
-
                         }
-
                         break;
 
                     case "show":
@@ -83,15 +76,15 @@ public class WorkerThread implements Runnable{
                             for (AccommodationRoom room: rooms){
                                 // If room is stored in this Worker
                                 if (room.getName().equals(task.getRoomName())){
+
                                     // This block is synchronized
-                                    synchronized (this) {
+                                    synchronized (room) {
                                         System.out.println("Before adding" + room.getStars());
                                         // add the review to the room
                                         room.addReview(task.getStarsFilter());
                                         System.out.println("After adding" + room.getStars());
                                     }
                                 }
-
                             }
                         }
                         break;
@@ -108,6 +101,13 @@ public class WorkerThread implements Runnable{
                                 }
                             }
                         }
+                        break;
+
+                    case "showAllRooms":
+                        System.out.println("SHOWALLROOMS");
+                        Socket Reducer = WorkerFunctions.connectWithReducer();
+                        ArrayList<AccommodationRoom> roomsAll = WorkerFunctions.showAllRooms(roomsMap);
+                        WorkerFunctions.sendResultToReducer(Reducer,(int) task.getTaskID(),roomsAll);
                         break;
 
                     default:

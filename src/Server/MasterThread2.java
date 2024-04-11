@@ -116,30 +116,36 @@ public class MasterThread2 implements Runnable{
 
 
     public void runRenterInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn){
-        try {
+        while (true) {
 
-            // Receive Task from Client
-            Task task = (Task)objectIn.readObject();
-            task.setIsManager(false);
+            try {
 
-            // Add task to the queue of pending tasks
-            taskMap.put((int)task.getTaskID(), task);
+                // Receive Task from Client
+                Task task = (Task) objectIn.readObject();
+                task.setIsManager(false);
 
-            // Establishes connection with Workers
-            HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+                System.out.print(task.getMethod());
 
-            // Send task to all the workers that Master is connected to
-            sendTaskToWorkers(task, sockets);
+                // Add task to the queue of pending tasks
+                taskMap.put((int) task.getTaskID(), task);
 
-            // Wait for the Task to complete
-            ArrayList<AccommodationRoom> result = waitForResult(task);
+                // Establishes connection with Workers
+                HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
 
-            // Return result back to user
-            objectOut.writeObject(result);
+                // Send task to all the workers that Master is connected to
+                sendTaskToWorkers(task, sockets);
 
-        }
-        catch (IOException| ClassNotFoundException e){
-            e.printStackTrace();
+                if ( task.getMethod().equals("insert") || task.getMethod().equals("showAllRooms")) {
+                    // Wait for the Task to complete
+                    ArrayList<AccommodationRoom> result = waitForResult(task);
+
+                    // Return result back to user
+                    objectOut.writeObject(result);
+                }
+
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 

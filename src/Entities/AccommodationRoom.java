@@ -2,6 +2,7 @@ package Entities;
 import org.json.simple.*;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.HashMap;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +16,7 @@ public class AccommodationRoom implements Serializable {
     private String area;
     private int stars;
     private int noOfReviews;
+    private int sumOfReviews;
     private String imagePath;
     private int owner;
 
@@ -28,6 +30,7 @@ public class AccommodationRoom implements Serializable {
         setName((String) json.get("roomName"));
         setStars((long)json.get("stars"));
         setNoOfReviews((long)json.get("noOfReviews"));
+        setSumOfReviews(getNoOfReviews() * getStars());
         setPrice((long) json.get("price"));
         setImagePath((String)json.get("imagePath"));
         setAvailableDates(json);
@@ -36,19 +39,23 @@ public class AccommodationRoom implements Serializable {
 
 
     public void addReview(int review){
-        int sum = getNoOfReviews() * getStars();
-        sum += review;
+
+        setSumOfReviews(getSumOfReviews() + review);
         setNoOfReviews(getNoOfReviews()+1);
-        setStars(sum/getNoOfReviews());
+        setStars(getSumOfReviews()/getNoOfReviews());
     }
 
 
     public String toString(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         String str = "\nName: " + getName() +"\nArea: " + getArea() + "\nCapacity: " + getCapacity() +
                 "\nStars: " + getStars() + "\nPrice: " + getPrice() + "\nAvailable Dates: ";
 
-        for (LocalDate date: availableDates.keySet()){
-            str += "\n" + date.toString() + " -> " + availableDates.get(date);
+        for (LocalDate tempDate: availableDates.keySet()){
+            String date1 = tempDate.format(formatter);
+            String date2 = availableDates.get(tempDate).format(formatter);
+            str += "\n" + date1 + " -> " + date2 ;
         }
 
         return (str);
@@ -92,6 +99,9 @@ public class AccommodationRoom implements Serializable {
     public void setStars(long stars) {
         this.stars = (int)stars;
     }
+    public int getSumOfReviews() {return sumOfReviews;}
+
+    public void setSumOfReviews(int sumOfReviews) {this.sumOfReviews = sumOfReviews;}
 
     public String getImagePath() {
         return imagePath;
@@ -150,14 +160,23 @@ public class AccommodationRoom implements Serializable {
             availDateFirst = date;
             availDateLast = availableDates.get(date);
 
-            if ( (dateFirst.isAfter(availDateFirst) || dateFirst.isEqual(availDateLast))
-                    && (dateLast.isBefore(availDateLast) || dateLast.isEqual(availDateLast))
-            ) {
+            if ( (dateFirst == null) && (dateLast == null) )
+            {
+                return true;
+            } else if ( (dateLast == null)
+                    && (dateFirst.isAfter(availDateFirst) || dateFirst.isEqual(availDateFirst)) ){
+                return true;
+            }else if ( (dateFirst == null)
+                    && (dateLast.isBefore(availDateLast) || dateLast.isEqual(availDateLast)) ){
+                return true;
+            } else if ( (dateFirst != null) && (dateLast != null) && (dateFirst.isAfter(availDateFirst) || dateFirst.isEqual(availDateFirst))
+                    && (dateLast.isBefore(availDateLast) || dateLast.isEqual(availDateLast)) ){
                 return true;
             }
         }
 
         return false;
     }
+
 
 }
