@@ -67,16 +67,21 @@ public class MasterThread2 implements Runnable{
             try {
                 // Receive Task from Client
                 Task task = (Task) objectIn.readObject();
-                task.setIsManager(true);
 
                 // Add task to the queue of pending tasks
                 taskMap.put((int) task.getTaskID(), task);
 
                 // If method of Task is "insert"
-                if (task.getMethod().equals("insert")) {
+                if (task.getMethod().equals("insert") || task.getMethod().equals("updateAvailableDates")) {
 
                     // Choosing Worker Node based on hashCode
-                    long hashCode = (long) task.getJson().get("roomName").hashCode();
+                    long hashCode;
+                    if (task.getJson() == null) {
+                        hashCode = (long) task.getRoomName().hashCode();
+                    }
+                    else {
+                        hashCode = (long) task.getJson().get("roomName").hashCode();
+                    }
                     int WorkerId = (int) hashCode % workersList.size();
                     task.setWorkerID(WorkerId);
 
@@ -124,7 +129,9 @@ public class MasterThread2 implements Runnable{
                 Task task = (Task) objectIn.readObject();
                 task.setIsManager(false);
 
-                System.out.print(task.getMethod());
+                if(task.getMethod().equals("exit")){
+                    break;
+                }
 
                 // Add task to the queue of pending tasks
                 taskMap.put((int) task.getTaskID(), task);

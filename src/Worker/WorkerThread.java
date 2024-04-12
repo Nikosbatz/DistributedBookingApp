@@ -49,6 +49,13 @@ public class WorkerThread implements Runnable{
                         WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
                         break;
 
+                    case "updateAvailableDates":
+                        if (task.getWorkerID() == this.WorkerID) {
+                            System.out.println("-------------------");
+                            WorkerFunctions.updateAvailableDates(task, roomsMap);
+                        }
+                        break;
+
                     default:
                         break;
                 }

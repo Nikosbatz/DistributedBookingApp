@@ -8,6 +8,8 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.net.Socket;
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 public class ManagerApp {
 
@@ -29,15 +31,18 @@ public class ManagerApp {
 
             // Declaring to Master to use the manager interface
             objectOut.writeObject("manager");
-            while (true) {
-                System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Exit");
+
+            boolean isRunning = true;
+            while (isRunning) {
+                System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Update available dates\n" +
+                        "4. Exit");
                 System.out.print("Enter your choice: ");
                 String response = scannerIn.nextLine();
 
                 // Instantiating new Task object
                 Task task = new Task();
+                task.setIsManager(true);
 
-                String masterResponse;
 
                 switch (response) {
 
@@ -78,12 +83,36 @@ public class ManagerApp {
                         }
                         break;
 
-                    // Exit the manager interface
+                    // update available room dates
                     case "3":
+                        task.setMethod("updateAvailableDates");
+                        task.setManagerID(1);
 
-                        objectOut.writeObject("Exiting manager interface...");
-                        objectOut.writeObject(null);
-                        objectOut.flush();
+                        System.out.print("Insert the room name: ");
+                        task.setRoomName(scannerIn.nextLine());
+
+                        // Asking user to insert the desired dates
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                        System.out.print("Insert initial availability date (dd-mm-yy): ");
+                        task.setDateFirst(LocalDate.parse(scannerIn.nextLine(), formatter));
+                        System.out.print("Insert final availability date (dd-mm-yy): ");
+                        task.setDateLast(LocalDate.parse(scannerIn.nextLine(), formatter));
+
+                        // Send Task to Master
+                        objectOut.writeObject(task);
+
+                        System.out.print("Waiting for Server...");
+                        break;
+
+
+                    // Exit the manager interface
+                    case "4":
+
+                        task.setMethod("exit");
+                        // Inform Master that the client is killing the process.
+                        objectOut.writeObject(task);
+                        isRunning = false;
+                        System.out.println("Exiting manager interface...");
                         break;
 
                     // Default option
@@ -94,10 +123,6 @@ public class ManagerApp {
                         break;
                 }
             }
-
-
-
-
         }
         catch (IOException | ClassNotFoundException |NullPointerException e){
             e.printStackTrace();

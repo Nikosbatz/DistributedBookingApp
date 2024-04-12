@@ -5,6 +5,7 @@ import Entities.*;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.*;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,19 @@ public class WorkerFunctions {
         System.out.println("list size: " + list.size());
 
     }
+
+
+    public static void updateAvailableDates(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+
+        ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
+        for (AccommodationRoom room: list){
+            if (room.getName().equals(task.getRoomName())){
+                room.setAvailableDates(task.getDateFirst(), task.getDateLast());
+            }
+        }
+
+    }
+
 
 
 

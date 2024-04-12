@@ -127,7 +127,7 @@ public class AccommodationRoom implements Serializable {
         return availableDates;
     }
 
-    private void setAvailableDates(JSONObject json) {
+    public void setAvailableDates(JSONObject json) {
         JSONArray availableDatesArray = (JSONArray) json.get("availableDates");
         for (Object date : availableDatesArray) {
             JSONObject availDate = (JSONObject) date;
@@ -138,11 +138,24 @@ public class AccommodationRoom implements Serializable {
             LocalDate dateStart = LocalDate.parse(dateFirst, formatter);
             LocalDate dateEnd = LocalDate.parse(dateLast, formatter);
 
-            availableDates.put(dateStart,dateEnd);
-
-
+            synchronized (availableDates) {
+                availableDates.put(dateStart, dateEnd);
+            }
         }
     }
+
+    // Override setAvailableDates()
+    public void setAvailableDates(LocalDate dateStart, LocalDate dateEnd){
+        HashMap<LocalDate, LocalDate> tempMap = new HashMap<>();
+        
+        synchronized (availableDates){
+            if (!availableDates.containsKey(dateStart)){
+                availableDates.put(dateStart, dateEnd);
+            }
+        }
+    }
+
+
 
     public HashMap<LocalDate, LocalDate> getBookedDates() {
         return bookedDates;
