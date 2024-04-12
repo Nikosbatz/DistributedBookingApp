@@ -68,6 +68,11 @@ public class MasterThread2 implements Runnable{
                 // Receive Task from Client
                 Task task = (Task) objectIn.readObject();
 
+                // If client wants to close connection
+                if(task.getMethod().equals("exit")){
+                    break;
+                }
+
                 // Add task to the queue of pending tasks
                 taskMap.put((int) task.getTaskID(), task);
 
@@ -129,6 +134,7 @@ public class MasterThread2 implements Runnable{
                 Task task = (Task) objectIn.readObject();
                 task.setIsManager(false);
 
+                // If client wants to close connection
                 if(task.getMethod().equals("exit")){
                     break;
                 }
