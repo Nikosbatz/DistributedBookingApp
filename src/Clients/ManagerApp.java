@@ -34,8 +34,7 @@ public class ManagerApp {
 
             boolean isRunning = true;
             while (isRunning) {
-                System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Update available dates\n" +
-                        "4. Exit");
+                System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Update available dates\n 4. See how many bookings each room has\n 5. Exit");
                 System.out.print("Enter your choice: ");
                 String response = scannerIn.nextLine();
 
@@ -62,6 +61,14 @@ public class ManagerApp {
 
                         // Waiting for Master response
                         System.out.println("Waiting for Server...\n");
+
+                        // Print to client the operation's confirmation
+                        if ((boolean)objectIn.readObject()){
+                            System.out.println("Room inserted successfully");
+                        }
+                        else{
+                            System.out.println("Room insertion failed...");
+                        }
                         break;
 
                     // Show Current manager's rooms
@@ -104,9 +111,24 @@ public class ManagerApp {
                         System.out.print("Waiting for Server...");
                         break;
 
+                    case "4":
+                        task.setMethod("countBookings");
+                        task.setManagerID(1);
+
+                        // Send Task to Master
+                        objectOut.writeObject(task);
+
+                        System.out.print("Waiting for Server...");
+
+                        ArrayList<AccommodationRoom> bookingCount = (ArrayList<AccommodationRoom>) objectIn.readObject();
+                        for (AccommodationRoom room : bookingCount) {
+                            System.out.println("\nRoom: " + room.getName() + " has in total: "  + room.getBookedDates().size() + " bookings.");
+                        }
+                        break;
+
 
                     // Exit the manager interface
-                    case "4":
+                    case "5":
 
                         task.setMethod("exit");
                         // Inform Master that the client is killing the process.

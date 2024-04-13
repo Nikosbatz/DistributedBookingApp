@@ -38,16 +38,19 @@ public class WorkerThread implements Runnable{
                 switch (task.getMethod()){
                     case "insert":
                         if (task.getWorkerID() == this.WorkerID) {
-                            WorkerFunctions.insert(task, roomsMap);
+                            // Return to Master "true" if room inserted successfully else "false"
+                            objectOut.writeObject(WorkerFunctions.insert(task, roomsMap));
                         }
                         break;
 
                     case "show":
+                    case "countBookings":
                         // Connects With Reducer
                         Socket Reducer = WorkerFunctions.connectWithReducer();
                         ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
                         WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
                         break;
+
 
                     case "updateAvailableDates":
                         if (task.getWorkerID() == this.WorkerID) {
@@ -104,7 +107,11 @@ public class WorkerThread implements Runnable{
                             for (AccommodationRoom room: rooms) {
                                 // If room is stored in this Worker
                                 if (room.getName().equals(task.getRoomName())) {
-                                    WorkerFunctions.bookAroom(task, room);
+                                    if(WorkerFunctions.bookAroom(task, room)){
+                                        objectOut.writeObject("Booking completed successfully !");
+                                    }else{
+                                        objectOut.writeObject("Couldn't complete the booking...");
+                                    }
                                 }
                             }
                         }

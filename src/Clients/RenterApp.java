@@ -33,7 +33,7 @@ public class RenterApp {
             // Declaring to Master to use the manager interface
             objectOut.writeObject("renter");
             while (true) {
-                System.out.println("Welcome\nChoose an option: \n1. Filter the rooms. \n2. Make a booking \n3. Rate a room");
+                System.out.println("Welcome\nChoose an option: \n1. Filter the rooms. \n2. Make a booking \n3. Rate a room \n4. Show all available rooms ");
                 System.out.print("Enter your choice: ");
                 String response = scannerIn.nextLine();
 
@@ -93,7 +93,8 @@ public class RenterApp {
                         // Waiting for Master response
                         System.out.println("Waiting for Server...");
 
-                        //masterResponse = (String)objectIn.readObject();
+//                        masterResponse = (String)objectIn.readObject();
+//                        System.out.println(masterResponse);
                     }
                     case "3" -> {
                         // Asking user to input the name of the room he wishes to review
@@ -115,7 +116,7 @@ public class RenterApp {
                         // Waiting for Master response
                         System.out.println("Waiting for Server...");
 
-                        //masterResponse = (String)objectIn.readObject();
+
 
                     }
                     case "4" ->{

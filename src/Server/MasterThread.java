@@ -90,17 +90,27 @@ public class MasterThread implements Runnable{
                     int WorkerId = (int) hashCode % workersList.size();
                     task.setWorkerID(WorkerId);
 
-
+                    ObjectInputStream workerIn = null;
+                    ObjectOutputStream workerOut = null;
                     for (Worker w : workersList) {
                         if (w.getId() == task.getWorkerID()) {
                             // Send insert Task to specific Worker based on Hashing
                             Socket socket = new Socket(w.getIp(), w.getPort());
-                            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                            System.out.print("-----------------");
-                            out.writeObject(task);
+
+                            workerOut = new ObjectOutputStream(socket.getOutputStream());
+                            workerIn = new ObjectInputStream(socket.getInputStream());
+
+                            workerOut.writeObject(task);
 
                         }
                     }
+                    // return to client whether the operation was successful or not
+                    if (workerIn != null && (boolean)workerIn.readObject()){
+                        objectOut.writeObject(true);
+                    }
+
+
+
                 } else {
 
                     System.out.println(task.getMethod());
@@ -149,13 +159,14 @@ public class MasterThread implements Runnable{
                 // Send task to all the workers that Master is connected to
                 sendTaskToWorkers(task, sockets);
 
-                if ( task.getMethod().equals("insert") || task.getMethod().equals("showAllRooms")) {
+                if ( task.getMethod().equals("filter") || task.getMethod().equals("showAllRooms")) {
                     // Wait for the Task to complete
                     ArrayList<AccommodationRoom> result = waitForResult(task);
 
                     // Return result back to user
                     objectOut.writeObject(result);
                 }
+
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();

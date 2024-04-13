@@ -58,6 +58,8 @@ public class AccommodationRoom implements Serializable {
             str += "\n" + date1 + " -> " + date2 ;
         }
 
+        str += "\n";
+
         return (str);
     }
 
