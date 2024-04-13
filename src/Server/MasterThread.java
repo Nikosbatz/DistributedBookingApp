@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class MasterThread2 implements Runnable{
+public class MasterThread implements Runnable{
     private Socket client;
     private  final ArrayList<Worker> workersList;
     private HashMap<Integer, Task> taskMap;
     HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks;
 
 
-    public MasterThread2(Socket client, ArrayList<Worker> workersList, HashMap<Integer,
+    public MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer,
                         Task> taskMap, HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks)
     {
         this.client = client;
@@ -94,10 +94,11 @@ public class MasterThread2 implements Runnable{
                     for (Worker w : workersList) {
                         if (w.getId() == task.getWorkerID()) {
                             // Send insert Task to specific Worker based on Hashing
-                            Socket socket = new Socket("localhost", w.getPort());
+                            Socket socket = new Socket(w.getIp(), w.getPort());
                             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                            System.out.print("-----------------");
                             out.writeObject(task);
-                            out.close();
+
                         }
                     }
                 } else {
@@ -195,7 +196,7 @@ public class MasterThread2 implements Runnable{
     // HELPER METHODS BELOW ============================
 
 
-    // Establish connection with each Worker that Master has.
+    // Establish connection with each Worker that Master is aware of.
     public HashMap<Socket, ObjectOutputStream> connectWithWorkers(){
 
         // Map of all the connections with Workers and the OutputStreams to communicate with each one
@@ -205,7 +206,7 @@ public class MasterThread2 implements Runnable{
             for (Worker w : workersList) {
 
                 // Establish a new connection with each of the Workers
-                socket = new Socket("localhost", w.getPort());
+                socket = new Socket(w.getIp(), w.getPort());
                 sockets.put(socket, new ObjectOutputStream(socket.getOutputStream()));
             }
         }

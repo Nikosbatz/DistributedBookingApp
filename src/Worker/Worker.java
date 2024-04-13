@@ -17,7 +17,9 @@ public class Worker {
     private static int nextWorkerId = 0;
     final private int id;
 
-    public HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
+    private String ip = "localhost";
+
+    public static HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap;
 
     // Default Constructor
     public Worker(){
@@ -26,6 +28,37 @@ public class Worker {
         roomsMap = new HashMap<>();
         startWorker();
     }
+
+    public Worker(String ip, int port, int id){
+        this.ip = ip;
+        this.port = port;
+        this.id = id;
+    }
+
+
+    public static void main (String[] args){
+
+        roomsMap = new HashMap<>();
+
+        try {
+
+            // Opening a ServerSocket to wait for connections
+            ServerSocket workerSocket = new ServerSocket(1111);
+
+            while (true) {
+                // Waiting for incoming connections...
+                Socket client = workerSocket.accept();
+
+                // Initializing a new thread to handle the MasterThread
+                new Thread(new WorkerThread(0, client, roomsMap)).start();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     public void startWorker (){
 
@@ -68,4 +101,6 @@ public class Worker {
     public int getPort() {
         return port;
     }
+
+    public String getIp() {return ip;}
 }
