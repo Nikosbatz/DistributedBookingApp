@@ -32,9 +32,19 @@ public class ManagerApp {
             // Declaring to Master to use the manager interface
             objectOut.writeObject("manager");
 
+            // Initializing formatter
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
             boolean isRunning = true;
             while (isRunning) {
-                System.out.println("Welcome ...\nChoose an option: \n 1. Insert a new room\n 2. Show all listings\n 3. Update available dates\n 4. See how many bookings each room has\n 5. Exit");
+                System.out.println("""
+                        Choose an option:\s
+                         1. Insert a new room
+                         2. Show all rooms
+                         3. Update available room dates
+                         4. Bookings of your rooms
+                         5. See how many total bookings were made per region in a specific time period
+                         6. Exit""");
                 System.out.print("Enter your choice: ");
                 String response = scannerIn.nextLine();
 
@@ -99,7 +109,7 @@ public class ManagerApp {
                         task.setRoomName(scannerIn.nextLine());
 
                         // Asking user to insert the desired dates
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
                         System.out.print("Insert initial availability date (dd-mm-yy): ");
                         task.setDateFirst(LocalDate.parse(scannerIn.nextLine(), formatter));
                         System.out.print("Insert final availability date (dd-mm-yy): ");
@@ -119,6 +129,7 @@ public class ManagerApp {
 
                         break;
 
+                    // Show the bookings of each room that manager owns
                     case "4":
                         task.setMethod("countBookings");
                         task.setManagerID(1);
@@ -129,14 +140,46 @@ public class ManagerApp {
                         System.out.print("Waiting for Server...");
 
                         ArrayList<AccommodationRoom> bookingCount = (ArrayList<AccommodationRoom>) objectIn.readObject();
+
                         for (AccommodationRoom room : bookingCount) {
-                            System.out.println("\nRoom: " + room.getName() + " has in total: "  + room.getBookedDates().size() + " bookings.");
+                            System.out.println("\nRoom: " + room.getName() + " has in total: " + room.getBookedDates().size() + " bookings.");
+                            System.out.println("The booked dates of the room: " + room.getName() + " are: ");
+                            String str = "";
+                            for (LocalDate tempDate : room.getBookedDates().keySet()) {
+                                String date1 = tempDate.format(formatter);
+                                String date2 = room.getBookedDates().get(tempDate).format(formatter);
+                                str += date1 + " -> " + date2 + "\n";
+                            }
+                            System.out.println(str);
                         }
+                        break;
+
+                    case "5":
+                        task.setMethod("totalBookings");
+                        task.setManagerID(1);
+
+                        // Asking user to insert the desired dates
+                        System.out.print("Insert first date of the period (dd-mm-yy): ");
+                        LocalDate dateOne = LocalDate.parse(scannerIn.nextLine(), formatter);
+                        System.out.print("Insert final date of the period (dd-mm-yy): ");
+                        LocalDate dateTwo = LocalDate.parse(scannerIn.nextLine(), formatter);
+
+
+                        // Send Task to Master
+                        objectOut.writeObject(task);
+
+                        System.out.print("Waiting for Server...");
+
+
+                        ArrayList<AccommodationRoom> rooms = (ArrayList<AccommodationRoom>) objectIn.readObject();
+
+                        printAllBookings(rooms,dateOne,dateTwo);
+
                         break;
 
 
                     // Exit the manager interface
-                    case "5":
+                    case "6":
 
                         task.setMethod("exit");
                         // Inform Master that the client is killing the process.
@@ -193,6 +236,31 @@ public class ManagerApp {
 
 
 
+    }
+    private static void printAllBookings(ArrayList<AccommodationRoom> rooms, LocalDate dateOne, LocalDate dateTwo) {
+        HashMap<String,Integer> totalBookings = new HashMap<>();
+        for (AccommodationRoom room : rooms) {
+            int count = 0;
+            for (LocalDate date : room.getBookedDates().keySet()){
+
+                if ((date.isEqual(dateOne)||date.isAfter(dateOne)) && ((room.getBookedDates().get(date).isEqual(dateTwo))||room.getBookedDates().get(date).isBefore(dateTwo))){
+
+                    count += 1;
+                }
+            }
+
+            if (totalBookings.containsKey(room.getArea())) {
+                totalBookings.replace(room.getArea(), totalBookings.get(room.getArea()) + count);
+            }
+            else{
+                totalBookings.put(room.getArea(), count);
+            }
+        }
+
+        for (String area: totalBookings.keySet()) {
+            String value = String.valueOf(totalBookings.get(area));
+            System.out.println(area + " : " + value);
+        }
     }
 
 

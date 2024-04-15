@@ -105,10 +105,7 @@ public class MasterThread implements Runnable{
                     // return to client whether the operation was successful or not
                     if (workerIn != null ){
                         objectOut.writeObject((boolean) workerIn.readObject());
-
                     }
-
-
 
                 } else {
 
