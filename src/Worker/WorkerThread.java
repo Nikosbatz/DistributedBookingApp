@@ -54,8 +54,8 @@ public class WorkerThread implements Runnable{
 
                     case "updateAvailableDates":
                         if (task.getWorkerID() == this.WorkerID) {
-                            System.out.println("-------------------");
-                            WorkerFunctions.updateAvailableDates(task, roomsMap);
+                            // Return to Master "true" if dates updated successfully else "false"
+                            objectOut.writeObject(WorkerFunctions.updateAvailableDates(task, roomsMap));
                         }
                         break;
 
@@ -89,16 +89,17 @@ public class WorkerThread implements Runnable{
 
                                     // This block is synchronized
                                     synchronized (room) {
-                                        System.out.println("Before adding" + room.getStars());
+
                                         // add the review to the room
-                                        room.addReview(task.getStarsFilter());
-                                        System.out.println("After adding" + room.getStars());
+                                        objectOut.writeObject(room.addReview(task.getStarsFilter()));
+
                                     }
                                 }
                             }
                         }
                         break;
 
+                    // TODO SYNCHRONIZE
                     case "book":
                         /* Iterates through all the values (ArrayList) of every key (managerID)
                            to check if the room with name = task.getRoomName() is in this Worker   */
@@ -107,11 +108,9 @@ public class WorkerThread implements Runnable{
                             for (AccommodationRoom room: rooms) {
                                 // If room is stored in this Worker
                                 if (room.getName().equals(task.getRoomName())) {
-                                    if(WorkerFunctions.bookAroom(task, room)){
-                                        objectOut.writeObject("Booking completed successfully !");
-                                    }else{
-                                        objectOut.writeObject("Couldn't complete the booking...");
-                                    }
+
+                                    objectOut.writeObject(WorkerFunctions.bookAroom(task, room));
+
                                 }
                             }
                         }

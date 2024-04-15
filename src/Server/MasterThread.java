@@ -73,8 +73,6 @@ public class MasterThread implements Runnable{
                     break;
                 }
 
-                // Add task to the queue of pending tasks
-                taskMap.put((int) task.getTaskID(), task);
 
                 // If method of Task is "insert"
                 if (task.getMethod().equals("insert") || task.getMethod().equals("updateAvailableDates")) {
@@ -105,8 +103,9 @@ public class MasterThread implements Runnable{
                         }
                     }
                     // return to client whether the operation was successful or not
-                    if (workerIn != null && (boolean)workerIn.readObject()){
-                        objectOut.writeObject(true);
+                    if (workerIn != null ){
+                        objectOut.writeObject((boolean) workerIn.readObject());
+
                     }
 
 
@@ -150,22 +149,57 @@ public class MasterThread implements Runnable{
                     break;
                 }
 
-                // Add task to the queue of pending tasks
-                taskMap.put((int) task.getTaskID(), task);
+                if ( task.getMethod().equals("book") || task.getMethod().equals("rate")) {
 
-                // Establishes connection with Workers
-                HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+                    // Choosing Worker Node based on hashCode
+                    long hashCode;
+                    if (task.getJson() == null) {
+                        hashCode = (long) task.getRoomName().hashCode();
+                    }
+                    else {
+                        hashCode = (long) task.getJson().get("roomName").hashCode();
+                    }
+                    int WorkerId = (int) hashCode % workersList.size();
+                    task.setWorkerID(WorkerId);
 
-                // Send task to all the workers that Master is connected to
-                sendTaskToWorkers(task, sockets);
+                    ObjectInputStream workerIn = null;
+                    ObjectOutputStream workerOut = null;
+                    for (Worker w : workersList) {
+                        if (w.getId() == task.getWorkerID()) {
+                            // Send insert Task to specific Worker based on Hashing
+                            Socket socket = new Socket(w.getIp(), w.getPort());
 
-                if ( task.getMethod().equals("filter") || task.getMethod().equals("showAllRooms")) {
+                            workerOut = new ObjectOutputStream(socket.getOutputStream());
+                            workerIn = new ObjectInputStream(socket.getInputStream());
+
+                            workerOut.writeObject(task);
+                            break;
+
+                        }
+                    }
+
+                    // return to client whether the operation was successful or not
+                    if (workerIn != null ){
+                        objectOut.writeObject((boolean) workerIn.readObject());
+                    }
+
+
+                }
+                else {
+                    // Establishes connection with Workers
+                    HashMap<Socket, ObjectOutputStream> sockets = connectWithWorkers();
+
+                    // Send task to all the workers that Master is connected to
+                    sendTaskToWorkers(task, sockets);
+
+
                     // Wait for the Task to complete
                     ArrayList<AccommodationRoom> result = waitForResult(task);
 
                     // Return result back to user
                     objectOut.writeObject(result);
                 }
+
 
 
             } catch (IOException | ClassNotFoundException e) {

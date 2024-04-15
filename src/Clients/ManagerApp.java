@@ -64,7 +64,7 @@ public class ManagerApp {
 
                         // Print to client the operation's confirmation
                         if ((boolean)objectIn.readObject()){
-                            System.out.println("Room inserted successfully");
+                            System.out.println("Room inserted successfully!");
                         }
                         else{
                             System.out.println("Room insertion failed...");
@@ -109,6 +109,14 @@ public class ManagerApp {
                         objectOut.writeObject(task);
 
                         System.out.print("Waiting for Server...");
+                        // Print to client the operation's confirmation
+                        if ((boolean)objectIn.readObject()){
+                            System.out.println("Dates updated successfully!");
+                        }
+                        else{
+                            System.out.println("Dates update failed...");
+                        }
+
                         break;
 
                     case "4":

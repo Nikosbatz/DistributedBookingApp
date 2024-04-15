@@ -28,15 +28,15 @@ public class WorkerFunctions {
     }
 
 
-    public static void updateAvailableDates(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+    public static boolean updateAvailableDates(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
 
         ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
         for (AccommodationRoom room: list){
             if (room.getName().equals(task.getRoomName())){
-                room.setAvailableDates(task.getDateFirst(), task.getDateLast());
+                return room.setAvailableDates(task.getDateFirst(), task.getDateLast());
             }
         }
-
+        return false;
     }
 
 

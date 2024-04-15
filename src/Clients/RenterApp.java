@@ -93,8 +93,15 @@ public class RenterApp {
                         // Waiting for Master response
                         System.out.println("Waiting for Server...");
 
-//                        masterResponse = (String)objectIn.readObject();
-//                        System.out.println(masterResponse);
+                        // Print to client the operation's confirmation
+                        if ((boolean)objectIn.readObject()){
+                            System.out.println("Your booking has been confirmed!");
+                        }
+                        else{
+                            System.out.println("Booking process failed...");
+                        }
+
+
                     }
                     case "3" -> {
                         // Asking user to input the name of the room he wishes to review
@@ -115,6 +122,14 @@ public class RenterApp {
 
                         // Waiting for Master response
                         System.out.println("Waiting for Server...");
+
+                        // Print to client the operation's confirmation
+                        if ((boolean)objectIn.readObject()){
+                            System.out.println("your review inserted successfully!");
+                        }
+                        else{
+                            System.out.println("Review insertion failed...");
+                        }
 
 
 

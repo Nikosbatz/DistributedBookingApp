@@ -38,11 +38,12 @@ public class AccommodationRoom implements Serializable {
 
 
 
-    public void addReview(int review){
+    public boolean addReview(int review){
 
         setSumOfReviews(getSumOfReviews() + review);
         setNoOfReviews(getNoOfReviews()+1);
         setStars(getSumOfReviews()/getNoOfReviews());
+        return true;
     }
 
 
@@ -147,14 +148,16 @@ public class AccommodationRoom implements Serializable {
     }
 
     // Override setAvailableDates()
-    public void setAvailableDates(LocalDate dateStart, LocalDate dateEnd){
+    public Boolean setAvailableDates(LocalDate dateStart, LocalDate dateEnd){
         HashMap<LocalDate, LocalDate> tempMap = new HashMap<>();
         
         synchronized (availableDates){
             if (!availableDates.containsKey(dateStart)){
                 availableDates.put(dateStart, dateEnd);
+                return true;
             }
         }
+        return false;
     }
 
 
