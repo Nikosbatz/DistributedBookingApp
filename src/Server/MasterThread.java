@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class MasterThread implements Runnable{
     private Socket client;
     private  final ArrayList<Worker> workersList;
-    private HashMap<Integer, Task> taskMap;
     HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks;
 
 
@@ -21,7 +20,6 @@ public class MasterThread implements Runnable{
     {
         this.client = client;
         this.workersList = workersList;
-        this.taskMap = taskMap;
         this.completedTasks = completedTasks;
     }
 
@@ -85,8 +83,9 @@ public class MasterThread implements Runnable{
                     else {
                         hashCode = (long) task.getJson().get("roomName").hashCode();
                     }
-                    int WorkerId = (int) hashCode % workersList.size();
+                    int WorkerId = Math.abs((int) hashCode % workersList.size());
                     task.setWorkerID(WorkerId);
+                    System.out.println("WorkerID: "+task.getWorkerID());
 
                     ObjectInputStream workerIn = null;
                     ObjectOutputStream workerOut = null;
@@ -127,6 +126,8 @@ public class MasterThread implements Runnable{
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
+                // In case of exception terminate thread (Breaking the loop terminates the execution of this thread)
+                break;
             }
         }
     }
@@ -201,6 +202,8 @@ public class MasterThread implements Runnable{
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
+                // In case of exception terminate thread (Breaking the loop terminates the execution of this thread)
+                break;
             }
         }
     }
@@ -213,10 +216,9 @@ public class MasterThread implements Runnable{
             int taskID = (int) objectIn.readObject();
             ArrayList<AccommodationRoom> result = (ArrayList<AccommodationRoom>) objectIn.readObject();
 
-            // Insert {taskID, result} to completedTasks and notifyAll threads waiting for new insertions
+            // Insert the Task object that Reducer sent to the completedTasks
             synchronized (completedTasks){
                 completedTasks.put(taskID, result);
-                notifyAll();
             }
 
 
@@ -225,13 +227,6 @@ public class MasterThread implements Runnable{
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
-
 
 
 

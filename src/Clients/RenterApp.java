@@ -36,7 +36,6 @@ public class RenterApp {
             boolean isRunning = true;
             while (isRunning) {
                 System.out.println("""
-                        Welcome
                         Choose an option:\s
                         1. Filter the rooms.\s
                         2. Make a booking\s

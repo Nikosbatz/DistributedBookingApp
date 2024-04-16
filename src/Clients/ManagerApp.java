@@ -118,7 +118,7 @@ public class ManagerApp {
                         // Send Task to Master
                         objectOut.writeObject(task);
 
-                        System.out.print("Waiting for Server...");
+                        System.out.println("Waiting for Server...");
                         // Print to client the operation's confirmation
                         if ((boolean)objectIn.readObject()){
                             System.out.println("Dates updated successfully!");
@@ -137,7 +137,7 @@ public class ManagerApp {
                         // Send Task to Master
                         objectOut.writeObject(task);
 
-                        System.out.print("Waiting for Server...");
+                        System.out.println("Waiting for Server...");
 
                         ArrayList<AccommodationRoom> bookingCount = (ArrayList<AccommodationRoom>) objectIn.readObject();
 
@@ -168,7 +168,7 @@ public class ManagerApp {
                         // Send Task to Master
                         objectOut.writeObject(task);
 
-                        System.out.print("Waiting for Server...");
+                        System.out.println("Waiting for Server...");
 
 
                         ArrayList<AccommodationRoom> rooms = (ArrayList<AccommodationRoom>) objectIn.readObject();

@@ -21,7 +21,7 @@ public class Reducer {
         ServerSocket server = null;
 
         // Number Of Worker servers
-        int workersNum = 1;
+        int workersNum = 2;
 
         // Instantiate and start a Daemon Thread
         Thread daemon = new Thread(new ReducerDaemonThread(workersNum, results, taskRepliesCount ));
