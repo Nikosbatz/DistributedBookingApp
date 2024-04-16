@@ -22,21 +22,28 @@ public class ReducerDaemonThread implements Runnable{
         this.taskRepliesCount = taskRepliesCount;
     }
 
-    public void run(){
+    public void run() {
 
         while(true){
-            for (int key: results.keySet()){
-                System.out.println(results.size());
-                if(taskRepliesCount.get(key) == WorkersNum){
+            synchronized (results) {
+                try {
+                    results.wait();
 
-                    sendResultToMaster(key);
-                    // Remove the results from this Task synchronized
-                    synchronized (results){
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                // key == taskID
+                for (int key: results.keySet()){
+
+                    // If all the Workers replied for this taskID
+                    if(taskRepliesCount.get(key) == WorkersNum){
+                        sendResultToMaster(key);
                         results.remove(key);
-                    }
-                    // Remove the reply count of this task synchronized
-                    synchronized (taskRepliesCount){
-                        taskRepliesCount.remove(key);
+
+                        // Safely remove this task's replies
+                        synchronized (taskRepliesCount){
+                            taskRepliesCount.remove(key);
+                        }
                     }
                 }
             }

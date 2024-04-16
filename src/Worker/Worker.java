@@ -29,6 +29,7 @@ public class Worker {
         startWorker();
     }
 
+    // Constructor for Distributed Workers (Different ip, port)
     public Worker(String ip, int port, int id){
         this.ip = ip;
         this.port = port;

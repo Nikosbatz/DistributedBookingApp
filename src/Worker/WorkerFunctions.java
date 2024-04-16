@@ -13,18 +13,17 @@ import java.text.ParseException;
 public class WorkerFunctions {
 
 
-    public synchronized static boolean insert(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
+    public static boolean insert(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
 
-        if (roomsMap.get(task.getManagerID()) == null){
-            roomsMap.put(task.getManagerID(), new ArrayList<>());
+        // Synchronize roomsMap structure to safely insert room
+        synchronized (roomsMap) {
+            if (roomsMap.get(task.getManagerID()) == null) {
+                roomsMap.put(task.getManagerID(), new ArrayList<>());
+            }
+            AccommodationRoom room = new AccommodationRoom(task.getJson());
+            ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
+            return (list.add(room));
         }
-
-        AccommodationRoom room = new AccommodationRoom(task.getJson());
-        ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
-        return(list.add(room));
-
-
-
     }
 
 
@@ -32,8 +31,11 @@ public class WorkerFunctions {
 
         ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
         for (AccommodationRoom room: list){
-            if (room.getName().equals(task.getRoomName())){
-                return room.setAvailableDates(task.getDateFirst(), task.getDateLast());
+            if (room.getName().equals(task.getRoomName())) {
+                // Synchronize AccommodationRoom object to safely update its attributes
+                synchronized (room) {
+                    return room.setAvailableDates(task.getDateFirst(), task.getDateLast());
+                }
             }
         }
         return false;
@@ -42,32 +44,31 @@ public class WorkerFunctions {
 
 
 
-    public static ArrayList<AccommodationRoom> filterRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap) throws java.text.ParseException {
+    public static ArrayList<AccommodationRoom> filterRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap) {
         ArrayList<AccommodationRoom> filteredRooms = new ArrayList<>();
 
-        synchronized (roomsMap) {
-            for (ArrayList<AccommodationRoom> rooms : roomsMap.values()) {
-                for (AccommodationRoom room : rooms) {
+        // Iterate through all the rooms and return those with the desired filters
+        for (ArrayList<AccommodationRoom> rooms : roomsMap.values()) {
 
-                    // This block is synchronized
-                    if ((task.getAreaFilter().equals("null") || room.getArea().equals(task.getAreaFilter()))
-                            && (task.getCapacityFilter() == 0 || room.getCapacity() >= task.getCapacityFilter())
-                            && (task.getPriceFilter() == 0 || room.getPrice() <= task.getPriceFilter())
-                            && (task.getStarsFilter() == 0 || room.getStars() >= task.getStarsFilter())
-                            && (room.isAvailable(task.getDateFirst(), task.getDateLast()))
-                    ) {
-                        filteredRooms.add(room);
-                    }
+            for (AccommodationRoom room : rooms) {
+
+                if ((task.getAreaFilter().equals("null") || room.getArea().equals(task.getAreaFilter()))
+                        && (task.getCapacityFilter() == 0 || room.getCapacity() >= task.getCapacityFilter())
+                        && (task.getPriceFilter() == 0 || room.getPrice() <= task.getPriceFilter())
+                        && (task.getStarsFilter() == 0 || room.getStars() >= task.getStarsFilter())
+                        && (room.isAvailable(task.getDateFirst(), task.getDateLast()))
+                ) {
+                    filteredRooms.add(room);
                 }
             }
         }
+
 
         return filteredRooms;
     }
 
 
     public static ArrayList<AccommodationRoom> showManagerRooms(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap){
-        System.out.println("list to return size: " + roomsMap.get(task.getManagerID()).size());
         return roomsMap.get(task.getManagerID());
     }
 
@@ -76,7 +77,6 @@ public class WorkerFunctions {
         for (ArrayList<AccommodationRoom> managerRooms : roomsMap.values()) {
             allRooms.addAll(managerRooms);
         }
-        System.out.println(allRooms.size() + "----------");
         return allRooms;
     }
 
@@ -107,11 +107,14 @@ public class WorkerFunctions {
     }
 
 
-    public static boolean bookAroom(Task task, AccommodationRoom room) throws ParseException {
+    public static boolean book(Task task, AccommodationRoom room) {
         LocalDate availDateFirst;
         LocalDate availDateLast;
+        // Synchronize AccommodationRoom object to safely modify the BookedDates
         synchronized (room) {
-            for (LocalDate date : room.getAvailableDates().keySet()) {
+            Set<LocalDate> availiableDatesSet = room.getAvailableDates().keySet();
+
+            for (LocalDate date :availiableDatesSet) {
                 availDateFirst = date;
                 availDateLast = room.getAvailableDates().get(date);
 

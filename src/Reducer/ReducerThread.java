@@ -50,7 +50,7 @@ public class ReducerThread implements Runnable{
 
 
 
-            System.out.println(result.size());
+
             synchronized (results) {
                 // Using for to get the key from the HashMap
                 for (int key : result.keySet()) {
@@ -65,6 +65,7 @@ public class ReducerThread implements Runnable{
                         results.get(key).addAll(result.get(key));
                     }
                 }
+                results.notifyAll();
             }
 
 

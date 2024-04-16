@@ -208,7 +208,7 @@ public class MasterThread implements Runnable{
     public void runReducerInterface(ObjectOutputStream objectOut, ObjectInputStream objectIn) {
 
         try {
-            System.out.println("MPIKE REDUCER INTERFACE");
+
             // Read taskID and result of the completed Task from reducer
             int taskID = (int) objectIn.readObject();
             ArrayList<AccommodationRoom> result = (ArrayList<AccommodationRoom>) objectIn.readObject();
@@ -216,7 +216,7 @@ public class MasterThread implements Runnable{
             // Insert {taskID, result} to completedTasks and notifyAll threads waiting for new insertions
             synchronized (completedTasks){
                 completedTasks.put(taskID, result);
-                completedTasks.notifyAll();
+                notifyAll();
             }
 
 
@@ -235,7 +235,7 @@ public class MasterThread implements Runnable{
 
 
 
-    // HELPER METHODS BELOW ============================
+    // METHODS USED IN INTERFACES BELOW ============================
 
 
     // Establish connection with each Worker that Master is aware of.
@@ -261,8 +261,6 @@ public class MasterThread implements Runnable{
 
 
     public void sendTaskToWorkers(Task task,HashMap<Socket, ObjectOutputStream> sockets){
-        // add task to the queue of pending tasks
-        this.taskMap.put((int)task.getTaskID(), task);
 
         // Send task to each Worker
         for (Socket socket : sockets.keySet()) {
@@ -278,27 +276,19 @@ public class MasterThread implements Runnable{
 
     public ArrayList<AccommodationRoom> waitForResult(Task task){
 
-        try {
-            while (true) {
+        // Thread constantly looking if the task that is sent to Worker is completed
+        while (true) {
 
-                // Wait for a new insertion on the completedTasks HashMap
+            synchronized (completedTasks) {
 
-
-                synchronized (completedTasks) {
-
-                    // If there is a key == taskID then return this {key, value} pair
-                    if (completedTasks.get((int) task.getTaskID()) != null) {
-                        ArrayList<AccommodationRoom> result = completedTasks.get((int) task.getTaskID());
-                        completedTasks.remove((int) task.getTaskID());
-                        return result;
-                    }
+                // If there is a key == taskID then return this {key, value} pair
+                if (completedTasks.get((int) task.getTaskID()) != null) {
+                    ArrayList<AccommodationRoom> result = completedTasks.get((int) task.getTaskID());
+                    completedTasks.remove((int) task.getTaskID());
+                    return result;
                 }
             }
         }
-        finally {}
-
-
-
     }
 
 

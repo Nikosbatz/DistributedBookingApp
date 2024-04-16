@@ -4,7 +4,6 @@ import Entities.*;
 
 import java.io.*;
 import java.net.*;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -32,6 +31,9 @@ public class WorkerThread implements Runnable{
             // Reads the task from Master
             Task task = (Task) objectIn.readObject();
 
+            // Declare the Socket to connect with the reducer
+            Socket Reducer;
+
             // If the task is sent from manager interface
             if (task.getIsManager()){
 
@@ -46,7 +48,7 @@ public class WorkerThread implements Runnable{
                     case "show":
                     case "countBookings":
                         // Connects With Reducer
-                        Socket Reducer = WorkerFunctions.connectWithReducer();
+                        Reducer = WorkerFunctions.connectWithReducer();
                         ArrayList<AccommodationRoom> rooms = WorkerFunctions.showManagerRooms(task, roomsMap);
                         WorkerFunctions.sendResultToReducer(Reducer, (int)task.getTaskID(), rooms);
                         break;
@@ -73,16 +75,13 @@ public class WorkerThread implements Runnable{
             else {
                 switch (task.getMethod()) {
                     case "filter":
-                        try {
-                            // Connects With Reducer
-                            Socket Reducer = WorkerFunctions.connectWithReducer();
-                            ArrayList<AccommodationRoom> filteredRooms = WorkerFunctions.filterRooms(task, roomsMap);
-                            WorkerFunctions.sendResultToReducer(Reducer, (int) task.getTaskID(), filteredRooms);
-                            break;
-                        }
-                        catch (java.text.ParseException e){
-                            e.printStackTrace();
-                        }
+
+                        // Connects With Reducer
+                        Reducer = WorkerFunctions.connectWithReducer();
+                        ArrayList<AccommodationRoom> filteredRooms = WorkerFunctions.filterRooms(task, roomsMap);
+                        WorkerFunctions.sendResultToReducer(Reducer, (int) task.getTaskID(), filteredRooms);
+                        break;
+
 
                     case "rate":
 
@@ -105,9 +104,9 @@ public class WorkerThread implements Runnable{
                         }
                         break;
 
-                    // TODO SYNCHRONIZE
+
                     case "book":
-                        /* Iterates through all the values (ArrayList) of every key (managerID)
+                        /* Iterates through the values (ArrayList) of every key (managerID)
                            to check if the room with name = task.getRoomName() is in this Worker   */
                         for(int managerId: roomsMap.keySet()){
                             ArrayList<AccommodationRoom> rooms = roomsMap.get(managerId);
@@ -115,7 +114,7 @@ public class WorkerThread implements Runnable{
                                 // If room is stored in this Worker
                                 if (room.getName().equals(task.getRoomName())) {
 
-                                    objectOut.writeObject(WorkerFunctions.bookAroom(task, room));
+                                    objectOut.writeObject(WorkerFunctions.book(task, room));
 
                                 }
                             }
@@ -123,8 +122,8 @@ public class WorkerThread implements Runnable{
                         break;
 
                     case "showAllRooms":
-                        System.out.println("SHOWALLROOMS");
-                        Socket Reducer = WorkerFunctions.connectWithReducer();
+
+                        Reducer = WorkerFunctions.connectWithReducer();
                         ArrayList<AccommodationRoom> roomsAll = WorkerFunctions.showAllRooms(roomsMap);
                         WorkerFunctions.sendResultToReducer(Reducer,(int) task.getTaskID(),roomsAll);
                         break;
@@ -135,7 +134,7 @@ public class WorkerThread implements Runnable{
             }
 
 
-        }catch (IOException | ClassNotFoundException | ParseException e){
+        }catch (IOException | ClassNotFoundException  e){
             e.printStackTrace();
         }
 
