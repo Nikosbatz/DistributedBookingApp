@@ -32,8 +32,17 @@ public class RenterApp {
 
             // Declaring to Master to use the manager interface
             objectOut.writeObject("renter");
-            while (true) {
-                System.out.println("Welcome\nChoose an option: \n1. Filter the rooms. \n2. Make a booking \n3. Rate a room \n4. Show all available rooms ");
+
+            boolean isRunning = true;
+            while (isRunning) {
+                System.out.println("""
+                        Welcome
+                        Choose an option:\s
+                        1. Filter the rooms.\s
+                        2. Make a booking\s
+                        3. Rate a room\s
+                        4. Show all available rooms
+                        5. Exit\s""");
                 System.out.print("Enter your choice: ");
                 String response = scannerIn.nextLine();
 
@@ -146,6 +155,12 @@ public class RenterApp {
                             System.out.println(room.toString());
                         }
 
+                    }
+                    case "5" -> {
+                        task.setMethod("exit");
+                        objectOut.writeObject(task);
+                        isRunning = false;
+                        System.out.println("Exiting renter interface...");
                     }
                 }
             }
