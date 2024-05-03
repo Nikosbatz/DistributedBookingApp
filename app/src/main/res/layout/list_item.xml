@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This will be the text"
+        android:textSize="20dp"
+        android:textAlignment="center"
+        android:id="@+id/list_text"
+        />
+
+    <ImageView
+        android:layout_width="250dp"
+        android:layout_height="125dp"
+        android:src="@drawable/ic_launcher_background"/>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
