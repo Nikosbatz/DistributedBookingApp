@@ -5,7 +5,7 @@
 "stars": 3,
 "noOfReviews": 15,
 "price": 120,
-"roomImage": "/usr/bin/images/roomName.png",
+  "imageName": "room2.jpg",
   "availableDates": [
     {
       "dateFirst": "10-01-2024",

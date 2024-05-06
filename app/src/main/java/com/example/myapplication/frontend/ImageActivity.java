@@ -43,9 +43,9 @@ public class ImageActivity extends AppCompatActivity {
         items.add("Third Item");
 
 
-        MyAdapter adapter = new MyAdapter(this,items);
+        /*MyAdapter adapter = new MyAdapter(this,items);*/
 
-        listView.setAdapter(adapter);
+        /*listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -53,7 +53,7 @@ public class ImageActivity extends AppCompatActivity {
                 Toast.makeText(ImageActivity.this, "Clicked: "+i, Toast.LENGTH_SHORT).show();
             }
 
-        });
+        });*/
 
     }
 }

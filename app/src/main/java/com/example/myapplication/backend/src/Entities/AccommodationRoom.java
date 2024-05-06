@@ -1,8 +1,11 @@
 package com.example.myapplication.backend.src.Entities;
 import org.json.simple.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.AbstractSet;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,14 +20,15 @@ public class AccommodationRoom implements Serializable {
     private int stars;
     private int noOfReviews;
     private int sumOfReviews;
-    private String imagePath;
+    private byte[] imageData;
+    private String imageName;
     private int owner;
 
     private HashMap<LocalDate,LocalDate> availableDates = new HashMap<LocalDate,LocalDate>();
     private HashMap<LocalDate,LocalDate> bookedDates = new HashMap<LocalDate,LocalDate>();
 
     // Create a new instance using a JSONObject object.
-    public AccommodationRoom(JSONObject json){
+    public AccommodationRoom(JSONObject json, byte[]imageData){
         setArea((String)json.get("area"));
         setCapacity( (long) json.get("capacity"));
         setName((String) json.get("roomName"));
@@ -32,8 +36,9 @@ public class AccommodationRoom implements Serializable {
         setNoOfReviews((long)json.get("noOfReviews"));
         setSumOfReviews(getNoOfReviews() * getStars());
         setPrice((long) json.get("price"));
-        setImagePath((String)json.get("imagePath"));
+        setImageName((String)json.get("imageName"));
         setAvailableDates(json);
+        setImageData(imageData);
     }
 
 
@@ -106,12 +111,12 @@ public class AccommodationRoom implements Serializable {
 
     public void setSumOfReviews(int sumOfReviews) {this.sumOfReviews = sumOfReviews;}
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageName() {
+        return imageName;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     public int getPrice() {return price;}
@@ -197,4 +202,11 @@ public class AccommodationRoom implements Serializable {
     }
 
 
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
 }

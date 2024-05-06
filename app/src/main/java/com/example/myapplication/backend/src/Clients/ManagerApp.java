@@ -5,6 +5,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.IOException;
 import java.net.Socket;
 import java.io.*;
@@ -58,6 +60,16 @@ public class ManagerApp {
                         task.setManagerID(1);
                         task.setMethod("insert");
                         task.setJson(json);
+
+                        System.out.println(json);
+
+                        // Reads byte of the image and stores a byte array in the task object
+                        byte[] imageData =  getImageData(json.get("imageName").toString());
+
+                        task.setImageData(imageData);
+
+
+
 
                         // Send Task to Master
                         objectOut.writeObject(task);
@@ -197,13 +209,19 @@ public class ManagerApp {
 
     public static JSONObject  insertJSONFile (Scanner scannerIn){
         try {
+            // initialize variable to read .json lines
             String jsonData = "";
 
             System.out.print("Enter .JSON file name: ");
             String jsonPath = scannerIn.nextLine();
 
+            // Get relative path of the .json file
+            Path dir = Paths.get(System.getProperty("user.dir")).resolve("src\\assets\\" + jsonPath + ".json");
+            System.out.println(dir);
+            String path = dir.toString();
+
             // Reads the json file from the selected directory
-            BufferedReader jsonFile = new BufferedReader(new FileReader("C:\\Users\\nikos\\Documents\\GitHub\\DistributedBookingApp_main\\src\\assets\\" + jsonPath + ".json"));
+            BufferedReader jsonFile = new BufferedReader(new FileReader(path));
             String line;
 
             // read each line of the .json file
@@ -254,6 +272,32 @@ public class ManagerApp {
             String value = String.valueOf(totalBookings.get(area));
             System.out.println(area + " : " + value);
         }
+    }
+
+    private static byte[] getImageData(String imgName){
+
+        // Get relative path of the .json file
+        Path dir = Paths.get(System.getProperty("user.dir")).resolve("src\\assets\\" + imgName );
+        String path = dir.toString();
+
+
+        try{
+            File img = new File(path);
+            FileInputStream fis = new FileInputStream(img);
+
+            byte[] imageData = new byte[(int) img.length()];
+            fis.read(imageData);
+            fis.close();
+
+            return imageData;
+
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+        return null;
     }
 
 

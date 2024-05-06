@@ -26,6 +26,7 @@ public class Task implements Serializable {
     private LocalDate  dateFirst;
 
     private LocalDate  dateLast;
+    private byte[] imageData;
 
 
 
@@ -151,5 +152,12 @@ public class Task implements Serializable {
     }
 
 
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
 }
 

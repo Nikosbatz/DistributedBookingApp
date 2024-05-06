@@ -30,16 +30,21 @@ public class WorkerThread implements Runnable{
             // Reads the task from Master
             Task task = (Task) objectIn.readObject();
 
+
             // Declare the Socket to connect with the reducer
             Socket Reducer;
+            System.out.println(task.getMethod());
 
             // If the task is sent from manager interface
             if (task.getIsManager()){
+
+
 
                 switch (task.getMethod()){
                     case "insert":
                         if (task.getWorkerID() == this.WorkerID) {
                             // Return to Master "true" if room inserted successfully else "false"
+
                             objectOut.writeObject(WorkerFunctions.insert(task, roomsMap));
                         }
                         break;

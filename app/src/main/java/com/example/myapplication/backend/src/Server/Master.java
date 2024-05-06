@@ -50,7 +50,7 @@ public class Master {
                 System.out.println("New client connected!");
 
                 // New Master Thread for the client
-                new Thread(new MasterThread(client, workersList, taskMap, completedTasks)).start();
+                new Thread(new MasterThread(client, workersList, completedTasks)).start();
             }
 
         }

@@ -16,7 +16,7 @@ public class MasterThread implements Runnable{
 
 
     public MasterThread(Socket client, ArrayList<Worker> workersList, HashMap<Integer,
-                        Task> taskMap, HashMap<Integer, ArrayList<AccommodationRoom>> completedTasks)
+                            ArrayList<AccommodationRoom>> completedTasks)
     {
         this.client = client;
         this.workersList = workersList;
@@ -66,6 +66,8 @@ public class MasterThread implements Runnable{
                 // Receive Task from Client
                 Task task = (Task) objectIn.readObject();
 
+                System.out.println("------");
+
                 // If client wants to close connection
                 if(task.getMethod().equals("exit")){
                     break;
@@ -101,9 +103,13 @@ public class MasterThread implements Runnable{
 
                         }
                     }
+                    System.out.println("------------");
                     // return to client whether the operation was successful or not
                     if (workerIn != null ){
                         objectOut.writeObject((boolean) workerIn.readObject());
+                    }
+                    else {
+                        objectOut.writeObject(false);
                     }
 
                 } else {

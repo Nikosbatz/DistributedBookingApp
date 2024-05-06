@@ -19,7 +19,8 @@ public class WorkerFunctions {
             if (roomsMap.get(task.getManagerID()) == null) {
                 roomsMap.put(task.getManagerID(), new ArrayList<>());
             }
-            AccommodationRoom room = new AccommodationRoom(task.getJson());
+            System.out.println(task.getImageData());
+            AccommodationRoom room = new AccommodationRoom(task.getJson(), task.getImageData());
             ArrayList<AccommodationRoom> list = roomsMap.get(task.getManagerID());
             return (list.add(room));
         }
