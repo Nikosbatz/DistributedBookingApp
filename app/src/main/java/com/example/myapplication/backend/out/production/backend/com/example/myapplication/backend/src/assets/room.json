@@ -1,0 +1,23 @@
+{
+"roomName": "distributed",
+"capacity": 2,
+"area": "Area1",
+"stars": 3,
+"noOfReviews": 5,
+"price": 120,
+"imageName": "room1.jpg",
+  "availableDates": [
+    {
+      "dateFirst": "10-01-2024",
+      "dateLast": "20-01-2024"
+    },
+    {
+      "dateFirst": "01-03-2024",
+      "dateLast": "01-04-2024"
+    },
+    {
+      "dateFirst": "20-04-2024",
+      "dateLast": "30-04-2024"
+    }
+  ]
+}
