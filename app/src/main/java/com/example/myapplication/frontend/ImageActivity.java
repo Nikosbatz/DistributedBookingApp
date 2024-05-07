@@ -43,9 +43,9 @@ public class ImageActivity extends AppCompatActivity {
         items.add("Third Item");
 
 
-        /*MyAdapter adapter = new MyAdapter(this,items);*/
+        /*ListingsAdapter adapter = new ListingsAdapter(this,items);
 
-        /*listView.setAdapter(adapter);
+        listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
