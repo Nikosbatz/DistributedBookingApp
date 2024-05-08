@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     Button search_btn;
     Context context = this;
+    Socket socket;
     ArrayList<AccommodationRoom> rooms;
 
     @Override
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Socket socket = null;
+                socket = null;
                 try {
                     // Change IP according to the server's local IP in the network
                     socket = new Socket("192.168.2.2", 1234);
@@ -53,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
 
                     // Writing objects to Server
                     ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
+
+                    // Set Socket and Streams to SocketHandler static variables so every activity can access them
+                    SocketHandler.setSocket(socket);
+                    SocketHandler.setObjectIn(objectIn);
+                    SocketHandler.setObjectOut(objectOut);
 
                     // Declaring to Master to use the renter interface
                     objectOut.writeObject("renter");
@@ -84,11 +90,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
+        Log.d("asd", "MAIN");
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int i, long id) {
-                Log.d("asd", "--------");
                 Intent intent = new Intent(getApplicationContext(),RoomDetailsActivity.class);
                 Toast.makeText(context, rooms.get(i).getName(), Toast.LENGTH_SHORT).show();
                 intent.putExtra("rooms", rooms.get(i));
@@ -98,18 +104,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-        /*search_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // For debugging
-                *//*Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();*//*
-
-                Intent i = new Intent(getApplicationContext(),ImageActivity.class);
-                i.putExtra("rooms", );
-                startActivity(i);
-            }
-        });*/
     }
 }

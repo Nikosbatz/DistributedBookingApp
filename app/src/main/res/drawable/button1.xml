@@ -1,7 +1,8 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
+    android:shape="rectangle">
     <size android:height="40dp" android:width="40dp" />
-    <solid android:color="#EE1165"/> <!-- Change color to desired color -->
+    <solid android:color="#EE1165"/><!-- Change color to desired color -->
+    <corners android:radius="8dp"
     /> <!-- Change radius to desired border radius -->
 </shape>
