@@ -85,6 +85,15 @@ public class RoomDetailsActivity extends AppCompatActivity {
             }
         });
 
+        bookBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(),BookingActivity.class);
+                intent.putExtra("room", room);
+                startActivity(intent);
+            }
+        });
+
     }
 
 

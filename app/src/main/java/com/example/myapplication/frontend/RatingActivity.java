@@ -20,6 +20,7 @@ import com.example.myapplication.backend.src.Entities.Task;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 
 public class RatingActivity extends AppCompatActivity {
 
@@ -59,19 +60,18 @@ public class RatingActivity extends AppCompatActivity {
                 submitBtn.setEnabled(false);
                 ratingBar.setIsIndicator(true);
 
-                // Instantiate Task object and set the request attributes
-                Task task = new Task();
-                task.setRoomName(room.getName());
-                task.setStarsFilter(rating);
-                task.setMethod("rate");
-
-                // Get the output stream from SocketHandler
-                ObjectOutputStream out = SocketHandler.getObjectOut();
-                ObjectInputStream in = SocketHandler.getObjectIn();
-
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        // Instantiate Task object and set the request attributes
+                        Task task = new Task();
+                        task.setRoomName(room.getName());
+                        task.setStarsFilter(rating);
+                        task.setMethod("rate");
+
+                        // Get the output stream from SocketHandler
+                        ObjectOutputStream out = SocketHandler.getObjectOut();
+                        ObjectInputStream in = SocketHandler.getObjectIn();
                         try {
                             // Send Task to Master
                             out.writeObject(task);
@@ -79,6 +79,10 @@ public class RatingActivity extends AppCompatActivity {
                             String text;
                             if (response){
                                 text = "Review sumbited successfully!";
+                                task = new Task();
+                                task.setMethod("showAllRooms");
+                                out.writeObject(task);
+                                MainActivity.rooms = (ArrayList<AccommodationRoom>) in.readObject();
                             }
                             else {
                                 text = "Operation Failed...";

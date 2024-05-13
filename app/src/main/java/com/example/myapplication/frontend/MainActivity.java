@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     Button search_btn;
     Context context = this;
     Socket socket;
-    ArrayList<AccommodationRoom> rooms;
+    public static ArrayList<AccommodationRoom> rooms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     objectOut.writeObject(task);
 
                     // Master Response
-                   rooms = (ArrayList<AccommodationRoom>) objectIn.readObject();
+                    rooms = (ArrayList<AccommodationRoom>) objectIn.readObject();
 
 
                     // Render ListView on the UI based on the rooms that master returned
