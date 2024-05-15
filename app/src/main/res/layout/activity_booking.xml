@@ -16,15 +16,17 @@
         android:scaleType="fitXY"
         app:srcCompat="@drawable/ic_launcher_background" />
 
+
     <TextView
         android:id="@+id/roomName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="Room name"
         android:textSize="25dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image" />
 
@@ -33,13 +35,13 @@
         style="@style/Widget.AppCompat.Spinner.DropDown"
         android:layout_width="180dp"
         android:layout_height="50dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="44dp"
         android:text="Initial date"
         android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/roomName" />
-
 
     <Button
         android:id="@+id/finalDate"
