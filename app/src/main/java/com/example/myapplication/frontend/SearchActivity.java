@@ -142,7 +142,6 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }).start();
 
-
             }
         });
     }
