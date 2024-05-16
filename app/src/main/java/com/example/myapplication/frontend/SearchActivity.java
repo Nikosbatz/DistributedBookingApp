@@ -149,7 +149,6 @@ public class SearchActivity extends AppCompatActivity {
 
 
 
-
     private void showDatePicker(){
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
