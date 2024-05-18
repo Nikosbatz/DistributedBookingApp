@@ -168,7 +168,8 @@ public class ManagerApp {
                         LocalDate dateOne = LocalDate.parse(scannerIn.nextLine(), formatter);
                         System.out.print("Insert final date of the period (dd-mm-yy): ");
                         LocalDate dateTwo = LocalDate.parse(scannerIn.nextLine(), formatter);
-
+                        task.setDateFirst(dateOne);
+                        task.setDateLast(dateTwo);
 
                         // Send Task to Master
                         objectOut.writeObject(task);
@@ -178,7 +179,7 @@ public class ManagerApp {
 
                         ArrayList<AccommodationRoom> rooms = (ArrayList<AccommodationRoom>) objectIn.readObject();
 
-                        printAllBookings(rooms,dateOne,dateTwo);
+                        printAllBookings(rooms);
 
                         break;
 
@@ -248,24 +249,16 @@ public class ManagerApp {
 
 
     }
-    private static void printAllBookings(ArrayList<AccommodationRoom> rooms, LocalDate dateOne, LocalDate dateTwo) {
+    private static void printAllBookings(ArrayList<AccommodationRoom> rooms) {
         HashMap<String,Integer> totalBookings = new HashMap<>();
         for (AccommodationRoom room : rooms) {
-            int count = 0;
-            for (LocalDate date : room.getBookedDates().keySet()){
-
-                if ((date.isEqual(dateOne)||date.isAfter(dateOne)) && ((room.getBookedDates().get(date).isEqual(dateTwo))||room.getBookedDates().get(date).isBefore(dateTwo))){
-
-                    count += 1;
-                }
-            }
-
             if (totalBookings.containsKey(room.getArea())) {
-                totalBookings.replace(room.getArea(), totalBookings.get(room.getArea()) + count);
+                totalBookings.replace(room.getArea(), totalBookings.get(room.getArea()) + room.getNoOfBookingsInRange());
             }
             else{
-                totalBookings.put(room.getArea(), count);
+                totalBookings.put(room.getArea(), room.getNoOfBookingsInRange());
             }
+            room.setNoOfBookingsInRange(0);
         }
 
         for (String area: totalBookings.keySet()) {

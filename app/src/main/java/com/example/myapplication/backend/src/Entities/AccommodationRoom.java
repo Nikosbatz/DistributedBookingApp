@@ -23,6 +23,7 @@ public class AccommodationRoom implements Serializable {
     private byte[] imageData;
     private String imageName;
     private int owner;
+    private int noOfBookingsInRange = 0;
 
     private HashMap<LocalDate,LocalDate> availableDates = new HashMap<LocalDate,LocalDate>();
     private HashMap<LocalDate,LocalDate> bookedDates = new HashMap<LocalDate,LocalDate>();
@@ -208,5 +209,13 @@ public class AccommodationRoom implements Serializable {
 
     public void setImageData(byte[] imageData) {
         this.imageData = imageData;
+    }
+
+    public int getNoOfBookingsInRange() {
+        return noOfBookingsInRange;
+    }
+
+    public void setNoOfBookingsInRange(int noOfBookingsInRange) {
+        this.noOfBookingsInRange = noOfBookingsInRange;
     }
 }

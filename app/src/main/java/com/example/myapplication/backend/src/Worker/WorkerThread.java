@@ -60,7 +60,7 @@ public class WorkerThread implements Runnable{
                     case "totalBookings":
 
                         Reducer = WorkerFunctions.connectWithReducer();
-                        ArrayList<AccommodationRoom> roomsAll = WorkerFunctions.showAllRooms(roomsMap);
+                        ArrayList<AccommodationRoom> roomsAll = WorkerFunctions.showRoomsInDateRange(task,roomsMap);
                         WorkerFunctions.sendResultToReducer(Reducer,(int) task.getTaskID(),roomsAll);
                         break;
 

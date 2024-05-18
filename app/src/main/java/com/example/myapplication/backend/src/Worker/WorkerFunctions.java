@@ -149,4 +149,37 @@ public class WorkerFunctions {
     }
 
 
+    public static ArrayList<AccommodationRoom> showRoomsInDateRange(Task task, HashMap<Integer, ArrayList<AccommodationRoom>> roomsMap) {
+        ArrayList<AccommodationRoom> filteredRooms = new ArrayList<>();
+        LocalDate dateOne = task.getDateFirst();
+        LocalDate dateTwo = task.getDateLast();
+        // Iterate through all the rooms and return those booked in the desired date range
+        for (ArrayList<AccommodationRoom> rooms : roomsMap.values()) {
+
+            for (AccommodationRoom room : rooms) {
+                if (roomIsBookedInDateRange(room,dateOne,dateTwo)){
+                    filteredRooms.add(room);
+                }
+            }
+        }
+
+        return filteredRooms;
+    }
+
+    private static boolean roomIsBookedInDateRange(AccommodationRoom room, LocalDate dateOne, LocalDate dateTwo) {
+        int count = 0;
+        for (LocalDate date : room.getBookedDates().keySet()){
+            if ((date.isEqual(dateOne)||date.isAfter(dateOne)) && ((room.getBookedDates().get(date).isEqual(dateTwo))||room.getBookedDates().get(date).isBefore(dateTwo))){
+                count += 1;
+            }
+        }
+        room.setNoOfBookingsInRange(count);
+        if (count == 0) {
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+
 }
