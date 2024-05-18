@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     Button search_btn;
     Context context = this;
+    public static Boolean refreshNeeded = false;
     Socket socket;
     public static ArrayList<AccommodationRoom> rooms;
 
@@ -77,8 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ListingsAdapter adapter = new ListingsAdapter(context, rooms);
-                            listView.setAdapter(adapter);
+                            renderListView();
                         }
                     });
 
@@ -103,6 +103,31 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        search_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context,SearchActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(refreshNeeded){
+            renderListView();
+        }
+
+    }
+
+    private void renderListView(){
+        ListingsAdapter adapter = new ListingsAdapter(context, rooms);
+        listView.setAdapter(adapter);
+    }
+
+
 }
