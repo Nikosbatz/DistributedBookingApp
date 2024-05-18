@@ -130,7 +130,7 @@ public class MasterThread implements Runnable{
                 }
 
 
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 e.printStackTrace();
                 // In case of exception terminate thread (Breaking the loop terminates the execution of this thread)
                 break;
@@ -206,7 +206,7 @@ public class MasterThread implements Runnable{
 
 
 
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 e.printStackTrace();
                 // In case of exception terminate thread (Breaking the loop terminates the execution of this thread)
                 break;
@@ -225,6 +225,7 @@ public class MasterThread implements Runnable{
             // Insert the Task object that Reducer sent to the completedTasks
             synchronized (completedTasks){
                 completedTasks.put(taskID, result);
+                completedTasks.notifyAll();
             }
 
 
@@ -275,12 +276,14 @@ public class MasterThread implements Runnable{
         }
     }
 
-    public ArrayList<AccommodationRoom> waitForResult(Task task){
+    public ArrayList<AccommodationRoom> waitForResult(Task task) throws InterruptedException {
 
         // Thread constantly looking if the task that is sent to Worker is completed
         while (true) {
 
             synchronized (completedTasks) {
+
+                completedTasks.wait();
 
                 // If there is a key == taskID then return this {key, value} pair
                 if (completedTasks.get((int) task.getTaskID()) != null) {

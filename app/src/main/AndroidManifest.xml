@@ -25,6 +25,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".frontend.SearchActivity"
+            android:exported="true" />
+        <activity
             android:name=".frontend.BookingActivity"
             android:exported="true" />
         <activity

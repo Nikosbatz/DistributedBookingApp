@@ -2,6 +2,7 @@ package com.example.myapplication.frontend;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -126,12 +127,12 @@ public class SearchActivity extends AppCompatActivity {
 
                         try {
                             out.writeObject(task);
-                            String text = "Rooms are now filtered";
                             MainActivity.rooms = (ArrayList<AccommodationRoom>) in.readObject();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(SearchActivity.this, text, Toast.LENGTH_LONG).show();
+                                    // Refresh Main Activity because MainActivity.rooms was modified
+                                    MainActivity.refreshNeeded = true;
                                     finish();
                                 }
                             });
