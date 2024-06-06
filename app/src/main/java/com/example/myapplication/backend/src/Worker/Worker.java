@@ -43,14 +43,14 @@ public class Worker {
         try {
 
             // Opening a ServerSocket to wait for connections
-            ServerSocket workerSocket = new ServerSocket(1111);
+            ServerSocket workerSocket = new ServerSocket(1112);
 
             while (true) {
                 // Waiting for incoming connections...
                 Socket client = workerSocket.accept();
 
                 // Initializing a new thread to handle the MasterThread
-                new Thread(new WorkerThread(0, client, roomsMap)).start();
+                new Thread(new WorkerThread(1, client, roomsMap)).start();
             }
 
         } catch (IOException e) {

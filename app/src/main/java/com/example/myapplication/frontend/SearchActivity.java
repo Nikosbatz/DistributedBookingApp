@@ -68,6 +68,8 @@ public class SearchActivity extends AppCompatActivity {
         checkOutButton = findViewById(R.id.checkOutButton);
         numberOfPeopleText = findViewById(R.id.numberOfPeopleText);
         numberPicker = findViewById(R.id.numberPicker);
+        numberPicker.setMaxValue(5);
+        numberPicker.setMinValue(1);
         ratingsText = findViewById(R.id.ratingsText);
         ratingBar = findViewById(R.id.ratingBar);
         submitButton = findViewById(R.id.submitButton);

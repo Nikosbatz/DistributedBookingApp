@@ -38,17 +38,18 @@ public class ReducerThread implements Runnable{
 
             synchronized (taskRepliesCount){
                 for (Integer taskID: result.keySet()){
+
                     if (taskRepliesCount.get(taskID) == null){
+
                         taskRepliesCount.put(taskID, 1);
                     }
                     else {
                         int i = taskRepliesCount.get(taskID) + 1;
                         taskRepliesCount.put(taskID, i);
+
                     }
                 }
             }
-
-
 
 
             synchronized (results) {

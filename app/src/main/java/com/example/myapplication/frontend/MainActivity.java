@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 socket = null;
                 try {
                     // Change IP according to the server's local IP in the network
-                    socket = new Socket("192.168.1.1", 1234);
+                    socket = new Socket("192.168.2.2", 1234);
 
                     // Reading objects from Server
                     ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream());

@@ -6,67 +6,61 @@
     android:layout_height="match_parent">
 
 
-
     <TextView
         android:id="@+id/filtersText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginStart="80dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="81dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="28dp"
+
         android:text="Filter Accommodations"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/locationEdit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/locationText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="79dp"
-        android:layout_marginEnd="62dp"
-        android:layout_marginBottom="41dp"
+        android:layout_marginTop="16dp"
         android:text="Location"
+
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/priceText"
-        app:layout_constraintEnd_toStartOf="@+id/locationEdit"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints"  />
+        app:layout_constraintTop_toBottomOf="@+id/filtersText"
+        app:layout_constraintVertical_bias="0.0" />
 
     <EditText
         android:id="@+id/locationEdit"
+
         android:layout_width="261dp"
         android:layout_height="48dp"
-        android:layout_marginStart="62dp"
-        android:layout_marginTop="13dp"
         android:gravity="center"
         android:hint="Enter here"
         android:paddingTop="0dp"
         android:textSize="14sp"
 
-        app:layout_constraintStart_toEndOf="@+id/locationText"
-        app:layout_constraintTop_toBottomOf="@+id/filtersText"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.973"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.112" />
 
     <TextView
         android:id="@+id/priceText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="41dp"
-        android:layout_marginEnd="87dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="44dp"
         android:text="Price"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/priceEdit"
-        app:layout_constraintStart_toStartOf="@+id/locationText"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/locationText"
         tools:ignore="MissingConstraints" />
 
@@ -74,28 +68,27 @@
         android:id="@+id/priceEdit"
         android:layout_width="260dp"
         android:layout_height="48dp"
-        android:layout_marginTop="22dp"
         android:gravity="center"
         android:hint="Enter here"
         android:paddingTop="0dp"
         android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/locationEdit"
         app:layout_constraintStart_toStartOf="@+id/locationEdit"
         app:layout_constraintTop_toBottomOf="@+id/locationEdit"
+        app:layout_constraintVertical_bias="0.033"
         tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/checkInText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
-        android:layout_marginEnd="100dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="64dp"
         android:text="Check-in Date"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/checkInButton"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/locationText"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/priceText"
         tools:ignore="MissingConstraints" />
 
@@ -105,7 +98,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textStyle="bold"
-
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/checkInButton"
         app:layout_constraintEnd_toEndOf="@+id/priceEdit"
         app:layout_constraintHorizontal_bias="0.584"
@@ -118,25 +111,25 @@
         android:id="@+id/checkInButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
         android:gravity="center"
         android:text="Pick a date"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/priceEdit"
         app:layout_constraintStart_toStartOf="@+id/priceEdit"
         app:layout_constraintTop_toBottomOf="@+id/priceEdit"
+        app:layout_constraintVertical_bias="0.022"
         tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/checkOutText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="42dp"
-        android:layout_marginEnd="89dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="10dp"
         android:text="Check-out Date"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/checkOutButton"
-        app:layout_constraintStart_toStartOf="@+id/locationText"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/checkInText"
         tools:ignore="MissingConstraints" />
 
@@ -160,22 +153,24 @@
         android:layout_marginTop="17dp"
         android:gravity="center"
         android:text="Pick a date"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/checkInButton"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/checkInButton"
         app:layout_constraintTop_toBottomOf="@+id/checkInButton"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/numberOfPeopleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="83dp"
-        android:layout_marginEnd="93dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="84dp"
         android:text="Number of People"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/numberPicker"
-        app:layout_constraintStart_toStartOf="@+id/locationText"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/checkOutText"
         tools:ignore="MissingConstraints" />
 
@@ -184,26 +179,23 @@
         android:layout_width="60dp"
         android:layout_height="121dp"
         android:layout_marginTop="21dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/checkOutButton"
         app:layout_constraintStart_toStartOf="@+id/checkOutButton"
         app:layout_constraintTop_toBottomOf="@+id/checkOutButton"
-        />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/ratingsText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="95dp"
-        android:layout_marginEnd="79dp"
-        android:layout_marginBottom="216dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="96dp"
         android:text="Ratings"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ratingBar"
-        app:layout_constraintStart_toStartOf="@+id/locationText"
-        app:layout_constraintTop_toBottomOf="@+id/numberOfPeopleText"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/numberOfPeopleText" />
 
     <RatingBar
         android:id="@+id/ratingBar"
@@ -211,10 +203,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="26dp"
         android:stepSize="1"
-        app:layout_constraintEnd_toEndOf="@+id/priceEdit"
-        app:layout_constraintStart_toStartOf="@+id/priceEdit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/numberPicker"
+        app:layout_constraintHorizontal_bias="0.483"
+        app:layout_constraintStart_toStartOf="@+id/numberPicker"
         app:layout_constraintTop_toBottomOf="@+id/numberPicker"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/submitButton"

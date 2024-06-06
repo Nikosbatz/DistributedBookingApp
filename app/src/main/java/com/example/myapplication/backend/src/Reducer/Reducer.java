@@ -21,7 +21,7 @@ public class Reducer {
 
         //TODO needs modification each time to match the correct number of workers that are running
         // Number Of Worker servers
-        int workersNum = 1;
+        int workersNum = 2;
 
         // Instantiate and start a Daemon Thread
         Thread daemon = new Thread(new ReducerDaemonThread(workersNum, results, taskRepliesCount ));

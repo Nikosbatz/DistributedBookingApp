@@ -77,11 +77,9 @@ public class RoomDetailsActivity extends AppCompatActivity {
         rateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("asd", "mpike");
                 Intent intent = new Intent(getApplicationContext(),RatingActivity.class);
                 intent.putExtra("room", room);
                 startActivity(intent);
-                Log.d("asd", "PERASEEE");
             }
         });
 

@@ -38,13 +38,11 @@ public class WorkerThread implements Runnable{
             // If the task is sent from manager interface
             if (task.getIsManager()){
 
-
-
                 switch (task.getMethod()){
                     case "insert":
                         if (task.getWorkerID() == this.WorkerID) {
                             // Return to Master "true" if room inserted successfully else "false"
-
+                            System.out.println("MPIke");
                             objectOut.writeObject(WorkerFunctions.insert(task, roomsMap));
                         }
                         break;

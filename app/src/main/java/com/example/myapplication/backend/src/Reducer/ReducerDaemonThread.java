@@ -34,6 +34,7 @@ public class ReducerDaemonThread implements Runnable{
                 // key == taskID
                 for (int key: results.keySet()){
 
+                    //TODO fix exception
                     // If all the Workers replied for this taskID
                     if(taskRepliesCount.get(key) == WorkersNum){
                         sendResultToMaster(key);
